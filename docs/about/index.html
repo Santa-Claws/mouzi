@@ -525,6 +525,10 @@
       color: var(--text);
     }
 
+    .footer-legal { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.75rem; }
+    .footer-legal a { color: var(--text-muted); text-decoration: none; font-size: 0.72rem; font-weight: 400; opacity: 0.5; transition: opacity 0.3s, color 0.3s; }
+    .footer-legal a:hover { opacity: 1; color: var(--text); }
+
     .cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,10,8,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 1rem 1.5rem; display: none; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
     .cookie-banner p { color: var(--text-muted); font-size: 0.82rem; margin: 0; }
     .cookie-banner p a { color: var(--primary); text-decoration: none; }
