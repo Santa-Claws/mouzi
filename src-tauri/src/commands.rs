@@ -102,6 +102,26 @@ pub fn undo_action_cmd(id: i64, state: tauri::State<AppState>) -> Result<bool, S
 }
 
 #[tauri::command]
+pub fn undo_all_cmd(state: tauri::State<AppState>) -> Result<i32, String> {
+    let logs = crate::db::get_undoable_logs().map_err(|e| e.to_string())?;
+    let db = get_db();
+    let conn = db.lock().unwrap();
+    let mut count = 0;
+
+    for (id, source, dest) in logs {
+        if !dest.is_empty() && std::path::Path::new(&dest).exists() {
+            let _ = std::fs::rename(&dest, &source);
+            let mut ignored = state.ignored_files.lock().unwrap();
+            ignored.insert(source, Instant::now());
+        }
+        let _ = conn.execute("UPDATE action_logs SET undone=1 WHERE id=?1", [id]);
+        count += 1;
+    }
+
+    Ok(count)
+}
+
+#[tauri::command]
 pub fn get_settings_cmd() -> Result<AppSettings, String> {
     get_settings().map_err(|e| e.to_string())
 }

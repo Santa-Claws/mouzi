@@ -89,6 +89,7 @@ pub fn run() {
             get_logs_cmd,
             get_stats_cmd,
             undo_action_cmd,
+            undo_all_cmd,
             get_settings_cmd,
             update_settings_cmd,
             enable_autostart_cmd,

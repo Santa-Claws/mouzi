@@ -298,6 +298,19 @@ pub fn get_recent_logs(limit: i64) -> SqliteResult<Vec<ActionLog>> {
     Ok(logs)
 }
 
+pub fn get_undoable_logs() -> SqliteResult<Vec<(i64, String, String)>> {
+    let db = get_db();
+    let conn = db.lock().unwrap();
+    let mut stmt = conn.prepare(
+        "SELECT id, source_path, destination_path FROM action_logs WHERE undone = 0 ORDER BY timestamp DESC"
+    )?;
+    let logs = stmt.query_map([], |row| {
+        Ok((row.get::<_, i64>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))
+    })?
+    .collect::<SqliteResult<Vec<_>>>()?;
+    Ok(logs)
+}
+
 pub fn get_weekly_stats() -> SqliteResult<Vec<(String, i64)>> {
     let db = get_db();
     let conn = db.lock().unwrap();

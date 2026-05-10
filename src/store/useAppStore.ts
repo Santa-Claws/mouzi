@@ -58,6 +58,7 @@ interface AppState {
   loadStats: () => Promise<void>;
   scanFolder: (path: string) => Promise<{ file: string; rule: string; destination: string }[]>;
   undoAction: (id: number) => Promise<boolean>;
+  undoAll: () => Promise<number>;
   addFolder: (path: string, mode: string) => Promise<void>;
   removeFolder: (id: number) => Promise<void>;
   addRule: (rule: Rule) => Promise<void>;
@@ -137,6 +138,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       await get().loadStats();
     }
     return success;
+  },
+
+  undoAll: async () => {
+    const count = await invoke<number>('undo_all_cmd');
+    if (count > 0) {
+      await get().loadLogs();
+      await get().loadStats();
+    }
+    return count;
   },
 
   addFolder: async (path, mode) => {

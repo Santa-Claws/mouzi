@@ -13,6 +13,7 @@ import {
   X,
   Check,
   ChevronLeft,
+  RotateCcw,
 } from "lucide-react";
 
 
@@ -34,6 +35,7 @@ export default function Settings() {
     deleteRule,
     clearLogs,
     undoAction,
+    undoAll,
     settings,
     saveSettings,
     setAutostart,
@@ -298,13 +300,22 @@ export default function Settings() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">{t("settings.history.title")}</h2>
-              <button
-                onClick={clearLogs}
-                className="flex items-center gap-1.5 rounded-md border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-              >
-                <Trash2 size={14} />
-                {t("settings.history.clear")}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => { await undoAll(); }}
+                  className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm text-text hover:bg-surface-dark"
+                >
+                  <RotateCcw size={14} />
+                  Revert All
+                </button>
+                <button
+                  onClick={clearLogs}
+                  className="flex items-center gap-1.5 rounded-md border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 size={14} />
+                  {t("settings.history.clear")}
+                </button>
+              </div>
             </div>
             {logs.length === 0 ? (
               <div className="text-center py-12 text-text-muted">{t("settings.history.empty")}</div>
