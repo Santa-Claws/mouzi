@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mouzi — Intelligent File Organizer</title>
-  <meta name="description" content="Mouzi is a silent, elegant file organizer that lives in your system tray and keeps your Downloads folder automatically tidy. 100% offline, 100% free.">
-  <meta name="keywords" content="file organizer, downloads organizer, windows tray app, automatic file sorting, file manager, open source">
+  <meta name="description"
+    content="Mouzi is a silent, elegant file organizer that lives in your system tray and keeps your Downloads folder automatically tidy. 100% offline, 100% free.">
+  <meta name="keywords"
+    content="file organizer, downloads organizer, windows tray app, automatic file sorting, file manager, open source">
   <meta name="author" content="Mouzi">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://mouzi.cc">
@@ -17,14 +20,17 @@
   <meta property="og:image" content="https://mouzi.cc/mouzilogo.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Mouzi — Intelligent File Organizer">
-  <meta name="twitter:description" content="Silent, automatic file organizer for Windows. Lives in your tray. 100% offline.">
+  <meta name="twitter:description"
+    content="Silent, automatic file organizer for Windows. Lives in your tray. 100% offline.">
 
   <link rel="icon" type="image/png" href="./mouzilogo.png">
   <link rel="apple-touch-icon" href="./mouzilogo.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
 
   <script type="application/ld+json">
   {
@@ -79,7 +85,9 @@
     /* ================================================================
        RESET & BASE
        ================================================================ */
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -130,7 +138,9 @@
     /* ================================================================
        TYPOGRAPHY
        ================================================================ */
-    h1, h2, h3 {
+    h1,
+    h2,
+    h3 {
       font-family: var(--font-display);
       font-weight: 400;
       letter-spacing: -0.02em;
@@ -306,6 +316,10 @@
       justify-content: center;
       text-align: center;
       overflow: hidden;
+      background:
+        radial-gradient(ellipse 60% 50% at 30% 20%, rgba(198, 179, 162, 0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 70% 80%, rgba(198, 179, 162, 0.04) 0%, transparent 60%),
+        var(--bg);
     }
 
     .hero-video {
@@ -315,7 +329,7 @@
       height: 100%;
       object-fit: cover;
       z-index: 0;
-      opacity: 0.5;
+      opacity: 0.6;
     }
 
     .hero-overlay {
@@ -323,7 +337,7 @@
       inset: 0;
       background:
         radial-gradient(ellipse at center, transparent 0%, var(--bg) 80%),
-        linear-gradient(to bottom, rgba(10,10,8,0.2) 0%, rgba(10,10,8,0.05) 40%, rgba(10,10,8,0.7) 100%);
+        linear-gradient(to bottom, rgba(10, 10, 8, 0.2) 0%, rgba(10, 10, 8, 0.05) 40%, rgba(10, 10, 8, 0.7) 100%);
       z-index: 1;
     }
 
@@ -828,6 +842,7 @@
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -835,10 +850,13 @@
     }
 
     @keyframes scroll-pulse {
-      0%, 100% {
+
+      0%,
+      100% {
         opacity: 0.3;
         transform: scaleY(0.4);
       }
+
       50% {
         opacity: 0.8;
         transform: scaleY(1);
@@ -857,16 +875,29 @@
       transform: translateY(0);
     }
 
-    .delay-1 { transition-delay: 0.1s; }
-    .delay-2 { transition-delay: 0.2s; }
-    .delay-3 { transition-delay: 0.3s; }
-    .delay-4 { transition-delay: 0.4s; }
+    .delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    .delay-4 {
+      transition-delay: 0.4s;
+    }
 
     /* ================================================================
        RESPONSIVE
        ================================================================ */
     @media (max-width: 768px) {
-      .nav-links, .nav-cta {
+
+      .nav-links,
+      .nav-cta {
         display: none;
       }
 
@@ -925,7 +956,8 @@
         gap: 1rem;
       }
 
-      .btn-primary, .btn-secondary {
+      .btn-primary,
+      .btn-secondary {
         width: 100%;
         justify-content: center;
       }
@@ -935,7 +967,10 @@
        REDUCED MOTION
        ================================================================ */
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
+
+      *,
+      *::before,
+      *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
@@ -986,7 +1021,7 @@
   </nav>
 
   <header class="hero">
-    <video class="hero-video" autoplay muted loop playsinline>
+    <video class="hero-video" autoplay muted loop>
       <source src="./video_bg.mp4" type="video/mp4">
     </video>
     <div class="hero-overlay"></div>
@@ -994,10 +1029,12 @@
     <div class="hero-content">
       <p class="hero-eyebrow">For Windows 10 & 11</p>
       <h1 class="hero-headline">Never think about<br><em>your Downloads</em> again.</h1>
-      <p class="hero-sub">Mouzi lives in your system tray and automatically sorts every file by type. No cloud. No clutter. No effort.</p>
+      <p class="hero-sub">Mouzi lives in your system tray and automatically sorts every downloaded file by type. No
+        cloud. No clutter. No effort.</p>
       <div class="hero-actions">
         <a href="#download" class="btn-primary">Download for Windows</a>
-        <a href="https://github.com/hsr88/mouzi" target="_blank" rel="noopener" class="btn-text">Star on GitHub <span class="arrow">→</span></a>
+        <a href="https://github.com/hsr88/mouzi" target="_blank" rel="noopener" class="btn-text">Star on GitHub <span
+            class="arrow">→</span></a>
       </div>
       <div class="hero-badges">
         <span class="badge">Windows 10 / 11</span>
@@ -1006,7 +1043,7 @@
       </div>
     </div>
     <div class="scroll-hint">
-      <span>Scroll</span>
+      <span></span>
       <div class="scroll-line"></div>
     </div>
   </header>
@@ -1021,7 +1058,8 @@
         <div class="bento-card large reveal">
           <span class="card-num">01</span>
           <h3>Silent by Design</h3>
-          <p>Runs quietly in the background. No pop-ups, no interruptions — just a subtle toast when files are organized.</p>
+          <p>Runs quietly in the background. No pop-ups, no interruptions — just a subtle toast when files are
+            organized.</p>
         </div>
         <div class="bento-card reveal delay-1">
           <span class="card-num">02</span>
@@ -1036,7 +1074,8 @@
         <div class="bento-card large reveal">
           <span class="card-num">04</span>
           <h3>Privacy First</h3>
-          <p>Zero cloud. Zero telemetry. All data stays on your machine in a local SQLite database. Nothing ever leaves your computer.</p>
+          <p>Zero cloud. Zero telemetry. All data stays on your machine in a local SQLite database. Nothing ever leaves
+            your computer.</p>
         </div>
         <div class="bento-card reveal delay-1">
           <span class="card-num">05</span>
@@ -1087,25 +1126,32 @@
         <details class="reveal">
           <summary>How does Mouzi work?</summary>
           <div class="faq-answer">
-            <p>Mouzi sits in your system tray and watches selected folders (like Downloads). When a new file appears, it waits 2 seconds to ensure the download is complete, then moves it to the appropriate subfolder based on your rules.</p>
+            <p>Mouzi sits in your system tray and watches selected folders (like Downloads). When a new file appears, it
+              waits 2 seconds to ensure the download is complete, then moves it to the appropriate subfolder based on
+              your rules.</p>
           </div>
         </details>
         <details class="reveal delay-1">
           <summary>Is my data sent anywhere?</summary>
           <div class="faq-answer">
-            <p>No. Mouzi is 100% offline. File names, rules, and history are stored in a local SQLite database on your machine. Nothing ever leaves your computer.</p>
+            <p>No. Mouzi is 100% offline. File names, rules, and history are stored in a local SQLite database on your
+              machine. Nothing ever leaves your computer.</p>
           </div>
         </details>
         <details class="reveal delay-2">
           <summary>Can I customize the rules?</summary>
           <div class="faq-answer">
-            <p>Absolutely. Open Settings from the tray menu and go to the Rules tab. You can create rules based on file extensions, regex patterns, and set custom destination folders with placeholders like <code>{year}</code>, <code>{month}</code>, or <code>{filename}</code>.</p>
+            <p>Absolutely. Open Settings from the tray menu and go to the Rules tab. You can create rules based on file
+              extensions, regex patterns, and set custom destination folders with placeholders like <code>{year}</code>,
+              <code>{month}</code>, or <code>{filename}</code>.
+            </p>
           </div>
         </details>
         <details class="reveal delay-3">
           <summary>What if Mouzi moves a file to the wrong place?</summary>
           <div class="faq-answer">
-            <p>Open the History tab in Settings. Every action can be undone with one click — Mouzi will move the file back to its original location.</p>
+            <p>Open the History tab in Settings. Every action can be undone with one click — Mouzi will move the file
+              back to its original location.</p>
           </div>
         </details>
         <details class="reveal">
@@ -1117,7 +1163,8 @@
         <details class="reveal delay-1">
           <summary>Is it really free?</summary>
           <div class="faq-answer">
-            <p>Yes. Mouzi is open source under the MIT License. You can use it, modify it, and even build your own version from the source code.</p>
+            <p>Yes. Mouzi is open source under the MIT License. You can use it, modify it, and even build your own
+              version from the source code.</p>
           </div>
         </details>
       </div>
@@ -1129,7 +1176,8 @@
       <div class="support-content reveal">
         <span class="section-label">Support</span>
         <h2 class="section-title">Keep Mouzi alive.</h2>
-        <p>If Mouzi saves you time and keeps your Downloads folder sane, consider buying me a coffee. It helps keep the project improving.</p>
+        <p>If Mouzi saves you time and keeps your Downloads folder sane, consider buying me a coffee. It helps keep the
+          project improving.</p>
         <a href="https://ko-fi.com/hsr" target="_blank" rel="noopener" class="btn-primary">☕ Buy me a coffee</a>
       </div>
     </div>
@@ -1212,13 +1260,21 @@
     });
 
     /* ================================================================
-       VIDEO FORCE PLAY
+       VIDEO FORCE PLAY (desktop autoplay policy workaround)
        ================================================================ */
     const heroVideo = document.querySelector('.hero-video');
     if (heroVideo) {
-      heroVideo.play().catch(() => {});
-      heroVideo.addEventListener('canplay', () => {
-        heroVideo.play().catch(() => {});
+      const tryPlay = () => {
+        if (heroVideo.paused) {
+          heroVideo.muted = true;
+          heroVideo.play().catch(() => {});
+        }
+      };
+      tryPlay();
+      heroVideo.addEventListener('canplay', tryPlay);
+      heroVideo.addEventListener('loadeddata', tryPlay);
+      ['click', 'mousemove', 'scroll', 'touchstart'].forEach(evt => {
+        document.addEventListener(evt, tryPlay, { once: true });
       });
     }
 
@@ -1226,7 +1282,7 @@
        SMOOTH SCROLL FOR ANCHORS
        ================================================================ */
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
+      anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
@@ -1236,4 +1292,5 @@
     });
   </script>
 </body>
+
 </html>
