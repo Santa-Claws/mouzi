@@ -55,7 +55,7 @@ Auto-detects your Windows system language. Supported:
 
 *(Falls back to English if system language is not supported)*
 
-### 🌗 Dark Mode
+### �- Dark Mode
 - Follows system theme, or force Light / Dark mode from settings
 
 ### 🔒 Privacy First
@@ -110,13 +110,13 @@ Downloads/Documents/{year}/{month}/
 
 ---
 
-## 🏗️ Architecture
+## �-️ Architecture
 
 ```
 ┌─────────────────────────────────────────────┐
 │  Frontend (React 19 + TypeScript + Tailwind) │
-│  ├── Popup window (300×420, frameless)       │
-│  └── Settings window (900×650)               │
+│  ├── Popup window (300�-420, frameless)       │
+│  └── Settings window (900�-650)               │
 ├─────────────────────────────────────────────┤
 │  Tauri 2.x Bridge                           │
 ├─────────────────────────────────────────────┤
