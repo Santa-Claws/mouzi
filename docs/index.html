@@ -8,7 +8,7 @@
   <meta name="description"
     content="Mouzi is a silent, elegant file organizer that lives in your system tray and keeps your Downloads folder automatically tidy. 100% offline, 100% free.">
   <meta name="keywords"
-    content="file organizer, downloads organizer, windows tray app, automatic file sorting, file manager, open source">
+    content="organize downloads folder, file organizer, downloads organizer, ,downloads folder clean, organize downloads folder automatically, open source">
   <meta name="author" content="Mouzi">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://mouzi.cc">
@@ -329,7 +329,7 @@
       height: 100%;
       object-fit: cover;
       z-index: 0;
-      opacity: 0.6;
+      opacity: 1;
     }
 
     .hero-overlay {
@@ -1267,12 +1267,15 @@
       const tryPlay = () => {
         if (heroVideo.paused) {
           heroVideo.muted = true;
-          heroVideo.play().catch(() => {});
+          heroVideo.play().catch((e) => { console.log('Play blocked:', e.message); });
         }
       };
+      console.log('Video initial state — paused:', heroVideo.paused, 'muted:', heroVideo.muted, 'readyState:', heroVideo.readyState);
       tryPlay();
-      heroVideo.addEventListener('canplay', tryPlay);
-      heroVideo.addEventListener('loadeddata', tryPlay);
+      heroVideo.addEventListener('canplay', () => { console.log('canplay fired'); tryPlay(); });
+      heroVideo.addEventListener('loadeddata', () => { console.log('loadeddata fired'); tryPlay(); });
+      heroVideo.addEventListener('play', () => console.log('VIDEO STARTED PLAYING'));
+      heroVideo.addEventListener('pause', () => console.log('VIDEO PAUSED'));
       ['click', 'mousemove', 'scroll', 'touchstart'].forEach(evt => {
         document.addEventListener(evt, tryPlay, { once: true });
       });
