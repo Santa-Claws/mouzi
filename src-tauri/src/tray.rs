@@ -58,6 +58,7 @@ fn show_popup_window(app: &AppHandle) {
         .transparent(true)
         .always_on_top(true)
         .skip_taskbar(true)
+        .shadow(false)
         .build();
 
         if let Ok(win) = window {

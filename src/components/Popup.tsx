@@ -72,7 +72,7 @@ export default function Popup() {
   const totalStats = stats.reduce((sum, s) => sum + s.count, 0);
 
   return (
-    <div className="flex h-full flex-col bg-surface text-text rounded-xl shadow-2xl border border-border overflow-hidden">
+    <div className="flex h-full flex-col bg-surface text-text border border-border overflow-hidden">
       {/* Header */}
       <div data-tauri-drag-region className="flex items-center justify-between px-4 py-3 bg-surface-dark border-b border-border">
         <div className="flex items-center gap-2">
