@@ -68,7 +68,19 @@ pub fn find_matching_rule(file: &FileInfo) -> Option<Rule> {
 }
 
 pub fn execute_rule(file_info: &FileInfo, rule: &Rule) -> Result<String, String> {
-    let dest = resolve_destination(&rule.destination, file_info);
+    let base_folder = file_info
+        .path
+        .parent()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_else(|| ".".to_string());
+
+    let dest = if Path::new(&rule.destination).is_absolute() {
+        // Backwards compatibility: old rules with absolute paths
+        resolve_destination(&rule.destination, file_info)
+    } else {
+        // New behavior: relative to the source folder
+        PathBuf::from(&base_folder).join(resolve_destination(&rule.destination, file_info))
+    };
 
     match rule.action.as_str() {
         "move" => {

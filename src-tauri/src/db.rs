@@ -153,7 +153,7 @@ pub fn insert_default_rules(folder_path: &str) -> SqliteResult<()> {
 
     for (name, priority, exts, dest) in defaults {
         let extensions = exts.join(",");
-        let destination = format!("{}/{}", folder_path, dest);
+        let destination = dest.to_string();
         conn.execute(
             "INSERT OR IGNORE INTO rules (name, priority, extensions, destination, action, folder_id) VALUES (?1, ?2, ?3, ?4, 'move', 0)",
             params![name, priority, extensions, destination],
