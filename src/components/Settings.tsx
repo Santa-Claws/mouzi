@@ -360,27 +360,6 @@ export default function Settings() {
 
         {tab === "general" && (
           <div className="space-y-6 max-w-md">
-            {/* Logo + tagline */}
-            <div className="flex items-center gap-3">
-              <img
-                src="/mouzilogo.png"
-                alt="Mouzi"
-                className="h-12 w-12 rounded-xl"
-              />
-              <div>
-                <h2 className="text-xl font-semibold">Mouzi</h2>
-                <p className="text-sm text-text-muted">Your downloads, tamed.</p>
-              </div>
-            </div>
-
-            <p className="text-sm text-text-muted leading-relaxed">
-              Mouzi is a silent, elegant file organizer that lives in your system
-              tray and keeps your Downloads folder (and any other folder)
-              automatically tidy. It runs quietly in the background, monitors
-              selected folders, and moves, renames, or sorts files based on
-              customizable rules.
-            </p>
-
             {/* Settings */}
             <div className="space-y-4">
               <div>
@@ -434,31 +413,42 @@ export default function Settings() {
               </div>
             </div>
 
-            {/* Links */}
-            <div className="space-y-2 pt-2 border-t border-border">
-              <button
-                onClick={() =>
-                  invoke("open_folder_cmd", { path: "https://mouzi.cc" })
-                }
-                className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text hover:bg-surface-hover transition-colors"
-              >
-                <Globe size={16} className="text-primary" />
-                Visit mouzi.cc
-                <ExternalLink size={14} className="ml-auto text-text-muted" />
-              </button>
-              <button
-                onClick={() =>
-                  invoke("open_folder_cmd", {
-                    path: "https://mouzi.cc/#download",
-                  })
-                }
-                className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text hover:bg-surface-hover transition-colors"
-              >
-                <Download size={16} className="text-primary" />
-                Check for Updates
-                <ExternalLink size={14} className="ml-auto text-text-muted" />
-              </button>
+            <div className="border-t border-border" />
+
+            {/* Logo + tagline */}
+            <div className="flex items-center gap-3">
+              <img
+                src="/mouzilogo.png"
+                alt="Mouzi"
+                className="h-12 w-12 rounded-xl"
+              />
+              <div>
+                <h2 className="text-xl font-semibold">Mouzi</h2>
+                <p className="text-sm text-text-muted">Your downloads, tamed.</p>
+              </div>
             </div>
+
+            <p className="text-sm text-text-muted leading-relaxed">
+              Mouzi is a silent, elegant file organizer that lives in your system
+              tray and keeps your Downloads folder (and any other folder)
+              automatically tidy. It runs quietly in the background, monitors
+              selected folders, and moves, renames, or sorts files based on
+              customizable rules.
+            </p>
+
+            {/* Check for Updates */}
+            <button
+              onClick={() =>
+                invoke("open_folder_cmd", {
+                  path: "https://mouzi.cc/#download",
+                })
+              }
+              className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text hover:bg-surface-hover transition-colors"
+            >
+              <Download size={16} className="text-primary" />
+              Check for Updates
+              <ExternalLink size={14} className="ml-auto text-text-muted" />
+            </button>
 
             {/* Author */}
             <div className="pt-2 border-t border-border">
