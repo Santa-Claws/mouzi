@@ -54,7 +54,7 @@ Auto-detects your Windows system language. Supported:
 
 *(Falls back to English if system language is not supported)*
 
-### �- Dark Mode
+### 🕶️ Dark Mode
 - Follows system theme, or force Light / Dark mode from settings
 
 ### 🔒 Privacy First
@@ -110,7 +110,7 @@ Downloads/Documents/{year}/{month}/
 
 ---
 
-## �-️ Architecture
+## 📐 Architecture
 
 ```
 +---------------------------------------------+
