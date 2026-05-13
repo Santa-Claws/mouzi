@@ -50,13 +50,24 @@ pub fn get_folders_cmd() -> Result<Vec<WatchedFolder>, String> {
 }
 
 #[tauri::command]
-pub fn add_folder_cmd(path: String, mode: String) -> Result<i64, String> {
-    add_watched_folder(&path, &mode).map_err(|e| e.to_string())
+pub fn add_folder_cmd(app: tauri::AppHandle, path: String, mode: String) -> Result<i64, String> {
+    let _ = std::fs::create_dir_all(&path);
+    let id = add_watched_folder(&path, &mode).map_err(|e| e.to_string())?;
+    if let Some(state) = app.try_state::<crate::AppState>() {
+        let mut watcher = state.watcher.lock().unwrap();
+        let _ = watcher.refresh(app.clone());
+    }
+    Ok(id)
 }
 
 #[tauri::command]
-pub fn remove_folder_cmd(id: i64) -> Result<(), String> {
-    remove_watched_folder(id).map_err(|e| e.to_string())
+pub fn remove_folder_cmd(app: tauri::AppHandle, id: i64) -> Result<(), String> {
+    remove_watched_folder(id).map_err(|e| e.to_string())?;
+    if let Some(state) = app.try_state::<crate::AppState>() {
+        let mut watcher = state.watcher.lock().unwrap();
+        let _ = watcher.refresh(app.clone());
+    }
+    Ok(())
 }
 
 #[tauri::command]

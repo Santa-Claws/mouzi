@@ -12,7 +12,46 @@ pub struct FileInfo {
     pub size: u64,
 }
 
+pub fn should_ignore_file(path: &Path) -> bool {
+    let name = path.file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+
+    let ignored_names = [
+        "desktop.ini", "thumbs.db", "ntuser.dat", "ntuser.ini",
+        "boot.ini", "bootmgr", "pagefile.sys", "hiberfil.sys",
+        "swapfile.sys", "autorun.inf", "config.sys", "io.sys",
+        "msdos.sys", "command.com", "ntldr", "bootsect.bak",
+    ];
+    if ignored_names.contains(&name.as_str()) {
+        return true;
+    }
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+        if let Ok(metadata) = fs::metadata(path) {
+            let attrs = metadata.file_attributes();
+            const FILE_ATTRIBUTE_HIDDEN: u32 = 0x2;
+            const FILE_ATTRIBUTE_SYSTEM: u32 = 0x4;
+            if attrs & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM) != 0 {
+                return true;
+            }
+        }
+    }
+
+    if name.starts_with('.') {
+        return true;
+    }
+
+    false
+}
+
 pub fn scan_file(path: &Path) -> Option<FileInfo> {
+    if should_ignore_file(path) {
+        return None;
+    }
     let metadata = fs::metadata(path).ok()?;
     let name = path.file_name()?.to_string_lossy().to_string();
     let extension = path
@@ -138,7 +177,7 @@ pub fn manual_scan_folder(folder: &str) -> Result<Vec<(String, String, String)>,
     for entry in entries {
         let entry = entry.map_err(|e| e.to_string())?;
         let path = entry.path();
-        if path.is_file() {
+        if path.is_file() && !should_ignore_file(&path) {
             if let Ok(Some((rule, dest))) = process_file(&path) {
                 results.push((
                     path.file_name().unwrap_or_default().to_string_lossy().to_string(),

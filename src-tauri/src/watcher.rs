@@ -1,5 +1,5 @@
 use crate::db::get_watched_folders;
-use crate::rules::process_file;
+use crate::rules::{process_file, should_ignore_file};
 use notify::{Config, Event, RecommendedWatcher, RecursiveMode, Watcher};
 use std::collections::HashMap;
 use std::path::Path;
@@ -115,6 +115,10 @@ impl FolderWatcher {
             if !folder.enabled {
                 continue;
             }
+            if !Path::new(&folder.path).exists() {
+                eprintln!("[watcher] Skipping missing folder: {}", folder.path);
+                continue;
+            }
             let path = folder.path.clone();
             let p = pending.clone();
             let ig = ignored.clone();
@@ -123,7 +127,7 @@ impl FolderWatcher {
                 move |res: Result<Event, notify::Error>| {
                     if let Ok(event) = res {
                         for path in event.paths {
-                            if path.is_file() {
+                            if path.is_file() && !should_ignore_file(&path) {
                                 let path_str = path.to_string_lossy().to_string();
                                 let mut ignore_guard = ig.lock().unwrap();
                                 if let Some(&instant) = ignore_guard.get(&path_str) {

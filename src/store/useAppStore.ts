@@ -150,13 +150,23 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   addFolder: async (path, mode) => {
-    await invoke('add_folder_cmd', { path, mode });
-    await get().loadFolders();
+    try {
+      await invoke('add_folder_cmd', { path, mode });
+      await get().loadFolders();
+    } catch (e) {
+      console.error('addFolder failed:', e);
+      throw e;
+    }
   },
 
   removeFolder: async (id) => {
-    await invoke('remove_folder_cmd', { id });
-    await get().loadFolders();
+    try {
+      await invoke('remove_folder_cmd', { id });
+      await get().loadFolders();
+    } catch (e) {
+      console.error('removeFolder failed:', e);
+      throw e;
+    }
   },
 
   addRule: async (rule) => {
