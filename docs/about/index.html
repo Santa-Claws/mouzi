@@ -750,6 +750,7 @@
             <li><a href="#getting-started">Getting Started</a></li>
             <li><a href="#features">Features</a></li>
             <li><a href="#configuration">Configuration</a></li>
+            <li><a href="#ignore-rules">Ignore Rules</a></li>
             <li><a href="#privacy">Privacy & Security</a></li>
             <li><a href="#faq">FAQ</a></li>
             <li><a href="#troubleshooting">Troubleshooting</a></li>
@@ -795,6 +796,51 @@
             <li><code>{filename}</code> - original file name without extension</li>
           </ul>
           <p><strong>General</strong> - Change language, theme, and autostart behavior.</p>
+
+          <h3 id="ignore-rules">Ignore Rules</h3>
+          <p>Mouzi can skip specific files or folders using <strong>ignore rules</strong>. You can set them up in
+            Settings → Ignore, or create a <code>.mouziignore</code> file manually in any watched folder.</p>
+          <p><strong>How it works.</strong> When Mouzi detects a new file, it first checks the
+            <code>.mouziignore</code> file in that folder. If the file name matches any rule, Mouzi leaves it alone.
+            Simple as that.</p>
+          <p><strong>Adding rules in the app.</strong> Open Settings → Ignore, select a watched folder, and type your
+            pattern in the input field. Press Enter or click <strong>Add</strong>, then <strong>Save</strong>. Mouzi
+            will create (or update) the <code>.mouziignore</code> file automatically.</p>
+          <p><strong>Writing rules manually.</strong> Create a plain text file named <code>.mouziignore</code> in the
+            folder you want to control. Write one rule per line. Lines starting with <code>#</code> are comments and
+            ignored.</p>
+          <p><strong>Rule types:</strong></p>
+          <ul>
+            <li><strong>Exact name</strong> — <code>desktop.ini</code> ignores only that exact file.</li>
+            <li><strong>Wildcard</strong> — <code>*.tmp</code> ignores all files ending with <code>.tmp</code>.
+              <code>~$*</code> ignores all Office temp files.</li>
+            <li><strong>Folder</strong> — <code>node_modules/</code> (with a trailing slash) ignores that folder
+              entirely.</li>
+          </ul>
+          <p><strong>Common examples:</strong></p>
+          <pre><code># Ignore Office temp files
+~$*
+
+# Ignore all .tmp files
+*.tmp
+
+# Ignore the node_modules folder
+node_modules/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Windows thumbnails
+Thumbs.db</code></pre>
+          <p><strong>Tips:</strong></p>
+          <ul>
+            <li>Rules are <strong>case-insensitive</strong> on Windows.</li>
+            <li>Each watched folder can have its own <code>.mouziignore</code> file.</li>
+            <li>If you delete the <code>.mouziignore</code> file, all files in that folder become eligible for sorting
+              again.</li>
+            <li>System files like <code>desktop.ini</code> are already ignored by default — you do not need to add them.
+            </li>
+          </ul>
 
           <h3 id="privacy">Privacy & Security</h3>
           <p>Mouzi is built on a <strong>local-first</strong> philosophy. This means:</p>
