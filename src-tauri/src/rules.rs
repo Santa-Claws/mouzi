@@ -29,6 +29,14 @@ pub fn should_ignore_file(path: &Path) -> bool {
         return true;
     }
 
+    // Browser temporary download files
+    let temp_extensions = [".crdownload", ".part", ".download", ".tmp"];
+    for ext in &temp_extensions {
+        if name.ends_with(ext) {
+            return true;
+        }
+    }
+
     #[cfg(windows)]
     {
         use std::os::windows::fs::MetadataExt;
