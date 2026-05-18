@@ -166,6 +166,12 @@ pub fn insert_default_rules(_folder_path: &str) -> SqliteResult<()> {
     let db = get_db();
     let conn = db.lock().unwrap();
 
+    // Only insert defaults if no rules exist yet
+    let count: i64 = conn.query_row("SELECT COUNT(*) FROM rules", [], |row| row.get(0))?;
+    if count > 0 {
+        return Ok(());
+    }
+
     let defaults = vec![
         ("Images", 1, vec!["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "ico"], "Images"),
         ("Documents", 2, vec!["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "rtf", "odt"], "Documents"),
@@ -180,7 +186,7 @@ pub fn insert_default_rules(_folder_path: &str) -> SqliteResult<()> {
         let extensions = exts.join(",");
         let destination = dest.to_string();
         conn.execute(
-            "INSERT OR IGNORE INTO rules (name, priority, extensions, destination, action, folder_id) VALUES (?1, ?2, ?3, ?4, 'move', 0)",
+            "INSERT INTO rules (name, priority, extensions, destination, action, folder_id) VALUES (?1, ?2, ?3, ?4, 'move', 0)",
             params![name, priority, extensions, destination],
         )?;
     }
