@@ -1,6 +1,8 @@
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager};
+use crate::db::get_watched_folders;
+use crate::rules::manual_scan_folder;
 
 pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -21,7 +23,7 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
                 show_settings_window(app);
             }
             "clean" => {
-                let _ = app.emit("trigger-clean", "");
+                let _ = perform_clean(app);
             }
             _ => {}
         })
@@ -42,7 +44,7 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn show_popup_window(app: &AppHandle) {
+pub fn show_popup_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("popup") {
         let _ = window.show();
         let _ = window.set_focus();
@@ -68,7 +70,22 @@ fn show_popup_window(app: &AppHandle) {
     }
 }
 
-fn show_settings_window(app: &AppHandle) {
+fn perform_clean(app: &AppHandle) -> Result<(), String> {
+    let folders = get_watched_folders().map_err(|e| e.to_string())?;
+    let mut total = 0;
+    for folder in folders {
+        if !folder.enabled { continue; }
+        if let Ok(results) = manual_scan_folder(&folder.path) {
+            total += results.len();
+        }
+    }
+    if total > 0 {
+        let _ = app.emit("show-notification", format!("Organized {} file(s)", total));
+    }
+    Ok(())
+}
+
+pub fn show_settings_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("settings") {
         let _ = window.show();
         let _ = window.set_focus();

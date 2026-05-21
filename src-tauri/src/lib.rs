@@ -30,6 +30,16 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--autostart"]),
         ))
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            // Bring existing window to focus when user tries to launch a second instance
+            if let Some(window) = app.get_webview_window("popup") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            } else if let Some(window) = app.get_webview_window("settings") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+        }))
         .manage(AppState {
             watcher: Arc::new(Mutex::new(FolderWatcher::new(ignored_files.clone()))),
             ignored_files,
@@ -45,8 +55,9 @@ pub fn run() {
             }
 
             // Initialize default rules on first run
-            if let Ok(settings) = db::get_settings() {
-                if settings.first_run {
+            let is_first_run = if let Ok(settings) = db::get_settings() {
+                let first = settings.first_run;
+                if first {
                     let downloads = commands::get_downloads_folder();
                     let _ = db::add_watched_folder(&downloads, "silent");
                     let _ = db::insert_default_rules(&downloads);
@@ -54,10 +65,18 @@ pub fn run() {
                     new_settings.first_run = false;
                     let _ = db::update_settings(&new_settings);
                 }
-            }
+                first
+            } else {
+                false
+            };
 
             // Setup system tray
             tray::setup_tray(&app_handle)?;
+
+            // On first launch, show the popup so the user knows the app is running
+            if is_first_run {
+                tray::show_popup_window(&app_handle);
+            }
 
             // Sync autostart with user settings
             if let Ok(settings) = db::get_settings() {
