@@ -46,10 +46,10 @@ impl FolderWatcher {
                     let mut guard = pending.lock().unwrap();
                     let ready: Vec<_> = guard
                         .iter()
-                        .filter(|p| now.duration_since(p.scheduled) >= Duration::from_secs(2))
+                        .filter(|p| now >= p.scheduled)
                         .cloned()
                         .collect();
-                    guard.retain(|p| now.duration_since(p.scheduled) < Duration::from_secs(2));
+                    guard.retain(|p| now < p.scheduled);
                     ready.into_iter().map(|p| p.path).collect()
                 };
 
@@ -137,12 +137,15 @@ impl FolderWatcher {
                                     ignore_guard.remove(&path_str);
                                 }
                                 drop(ignore_guard);
+                                let grace = crate::db::get_settings()
+                                    .map(|s| s.grace_period_seconds as u64)
+                                    .unwrap_or(300);
                                 let mut guard = p.lock().unwrap();
                                 // Remove existing pending entry for this path to reschedule
                                 guard.retain(|x| x.path != path);
                                 guard.push(PendingFile {
                                     path,
-                                    scheduled: Instant::now(),
+                                    scheduled: Instant::now() + Duration::from_secs(grace),
                                 });
                             }
                         }

@@ -38,6 +38,8 @@ export interface AppSettings {
   telemetry_enabled: boolean;
   first_run: boolean;
   autostart: boolean;
+  grace_period_seconds: number;
+  lock_check_enabled: boolean;
 }
 
 interface AppState {

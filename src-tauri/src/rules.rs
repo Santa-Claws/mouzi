@@ -1,9 +1,35 @@
-use crate::db::{get_rules, log_action, ActionLog, Rule};
+use crate::db::{get_rules, get_settings, log_action, ActionLog, Rule};
 use crate::ignore::{is_ignored, load_mouziignore};
 use chrono::Utc;
 use regex::Regex;
 use std::fs;
 use std::path::{Path, PathBuf};
+
+/// Check if a file is currently locked by another process.
+/// On Windows this tries to open with write access; if another process holds
+/// the file without FILE_SHARE_WRITE the open will fail.
+fn is_file_locked(path: &Path) -> bool {
+    match fs::OpenOptions::new().write(true).open(path) {
+        Ok(_) => false,
+        Err(_) => true,
+    }
+}
+
+/// Check whether a file has passed its grace period since last modification.
+/// Returns true if the file is ready to be moved.
+fn check_grace_period(path: &Path, grace_seconds: i64) -> bool {
+    if grace_seconds <= 0 {
+        return true;
+    }
+    if let Ok(metadata) = fs::metadata(path) {
+        if let Ok(modified) = metadata.modified() {
+            if let Ok(elapsed) = modified.elapsed() {
+                return elapsed.as_secs() >= grace_seconds as u64;
+            }
+        }
+    }
+    true
+}
 
 #[derive(Debug, Clone)]
 pub struct FileInfo {
@@ -155,6 +181,17 @@ pub fn execute_rule(file_info: &FileInfo, rule: &Rule) -> Result<String, String>
 }
 
 pub fn process_file(path: &Path) -> Result<Option<(Rule, String)>, String> {
+    let (grace_period, lock_check) = get_settings()
+        .map(|s| (s.grace_period_seconds, s.lock_check_enabled))
+        .unwrap_or((300, true));
+
+    if !check_grace_period(path, grace_period) {
+        return Ok(None);
+    }
+    if lock_check && is_file_locked(path) {
+        return Ok(None);
+    }
+
     if let Some(parent) = path.parent() {
         let patterns = load_mouziignore(&parent.to_string_lossy());
         if let Some(name) = path.file_name().and_then(|n| n.to_str()) {

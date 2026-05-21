@@ -418,6 +418,67 @@ export default function Settings() {
                   />
                 </button>
               </div>
+
+              {/* Grace Period */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-text-muted">
+                    Grace period
+                  </label>
+                  <span className="text-xs text-text-muted">
+                    {settings?.grace_period_seconds
+                      ? settings.grace_period_seconds >= 60
+                        ? `${(settings.grace_period_seconds / 60).toFixed(0)} min`
+                        : `${settings.grace_period_seconds}s`
+                      : "5 min"}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={600}
+                  step={30}
+                  value={settings?.grace_period_seconds ?? 300}
+                  onChange={(e) => {
+                    if (!settings) return;
+                    const val = parseInt(e.target.value, 10);
+                    const updated = { ...settings, grace_period_seconds: val };
+                    saveSettings(updated);
+                  }}
+                  className="w-full accent-primary"
+                />
+                <p className="text-xs text-text-muted">
+                  Wait time before moving a file after it was last modified. 0 = instant.
+                </p>
+              </div>
+
+              {/* Lock Check */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-text-muted">
+                    Check file lock
+                  </label>
+                  <p className="text-xs text-text-muted">
+                    Skip files currently in use by another process
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (!settings) return;
+                    const updated = { ...settings, lock_check_enabled: !settings.lock_check_enabled };
+                    saveSettings(updated);
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings?.lock_check_enabled ? "bg-primary" : "bg-surface-dark"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings?.lock_check_enabled ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
 
             <div className="border-t border-border" />

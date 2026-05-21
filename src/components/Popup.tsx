@@ -35,6 +35,7 @@ export default function Popup() {
     isLoading,
     loadLogs,
     loadStats,
+    loadFolders,
     scanFolder,
     undoAction,
     folders,
@@ -46,16 +47,21 @@ export default function Popup() {
   useEffect(() => {
     loadLogs();
     loadStats();
-  }, [loadLogs, loadStats]);
+    loadFolders();
+  }, [loadLogs, loadStats, loadFolders]);
 
   const handleClean = async () => {
-    const downloads = folders[0]?.path || (await invoke<string>("get_downloads_folder"));
-    const results = await scanFolder(downloads);
-    setScanResults(results);
-    if (results.length > 0) {
+    let allResults: { file: string; rule: string; destination: string }[] = [];
+    const targets = folders.length > 0 ? folders.map((f) => f.path) : [await invoke<string>("get_downloads_folder")];
+    for (const path of targets) {
+      const results = await scanFolder(path);
+      allResults = allResults.concat(results);
+    }
+    setScanResults(allResults);
+    if (allResults.length > 0) {
       await invoke("show_notification", {
         title: "Mouzi",
-        body: t("notifications.cleaned", { count: results.length }),
+        body: t("notifications.cleaned", { count: allResults.length }),
       });
     }
   };

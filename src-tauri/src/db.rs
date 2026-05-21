@@ -46,6 +46,8 @@ pub struct AppSettings {
     pub telemetry_enabled: bool,
     pub first_run: bool,
     pub autostart: bool,
+    pub grace_period_seconds: i64,
+    pub lock_check_enabled: bool,
 }
 
 static DB: OnceCell<Arc<Mutex<Connection>>> = OnceCell::new();
@@ -105,12 +107,18 @@ pub fn init_db(app_dir: PathBuf) -> SqliteResult<()> {
         [],
     )?;
 
-    // Migration: add autostart column if missing
+    // Migration: add missing columns
     let cols: Vec<String> = conn.prepare("PRAGMA table_info(settings)")?
         .query_map([], |row| row.get::<_, String>(1))?
         .collect::<Result<Vec<_>, _>>()?;
     if !cols.iter().any(|c| c == "autostart") {
         conn.execute("ALTER TABLE settings ADD COLUMN autostart INTEGER NOT NULL DEFAULT 1", [])?;
+    }
+    if !cols.iter().any(|c| c == "grace_period_seconds") {
+        conn.execute("ALTER TABLE settings ADD COLUMN grace_period_seconds INTEGER NOT NULL DEFAULT 300", [])?;
+    }
+    if !cols.iter().any(|c| c == "lock_check_enabled") {
+        conn.execute("ALTER TABLE settings ADD COLUMN lock_check_enabled INTEGER NOT NULL DEFAULT 1", [])?;
     }
 
     // Insert default settings if empty
@@ -374,7 +382,7 @@ pub fn get_settings() -> SqliteResult<AppSettings> {
     let db = get_db();
     let conn = db.lock().unwrap();
     conn.query_row(
-        "SELECT id, language, theme, telemetry_enabled, first_run, autostart FROM settings LIMIT 1",
+        "SELECT id, language, theme, telemetry_enabled, first_run, autostart, grace_period_seconds, lock_check_enabled FROM settings LIMIT 1",
         [],
         |row| {
             Ok(AppSettings {
@@ -384,6 +392,8 @@ pub fn get_settings() -> SqliteResult<AppSettings> {
                 telemetry_enabled: row.get::<_, i32>(3)? != 0,
                 first_run: row.get::<_, i32>(4)? != 0,
                 autostart: row.get::<_, i32>(5).unwrap_or(1) != 0,
+                grace_period_seconds: row.get::<_, i64>(6).unwrap_or(300),
+                lock_check_enabled: row.get::<_, i32>(7).unwrap_or(1) != 0,
             })
         },
     )
@@ -393,13 +403,15 @@ pub fn update_settings(settings: &AppSettings) -> SqliteResult<()> {
     let db = get_db();
     let conn = db.lock().unwrap();
     conn.execute(
-        "UPDATE settings SET language=?1, theme=?2, telemetry_enabled=?3, first_run=?4, autostart=?5 WHERE id=?6",
+        "UPDATE settings SET language=?1, theme=?2, telemetry_enabled=?3, first_run=?4, autostart=?5, grace_period_seconds=?6, lock_check_enabled=?7 WHERE id=?8",
         params![
             settings.language,
             settings.theme,
             settings.telemetry_enabled as i32,
             settings.first_run as i32,
             settings.autostart as i32,
+            settings.grace_period_seconds,
+            settings.lock_check_enabled as i32,
             settings.id
         ],
     )?;
