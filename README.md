@@ -184,7 +184,11 @@ Output will be in `src-tauri/target/release/bundle/`.
 - [x] Check for updates button
 - [x] `.mouziignore` - per-folder ignore patterns (like `.gitignore`)
 - [x] Portable version (single .exe, no installer)
-- [ ] Grace period option - delay moving files by X minutes (so browser download links stay valid)
+- [x] Browser temp files ignored (`.crdownload`, `.part`, `.tmp`)
+- [x] Grace period option - delay moving files by X minutes (so browser download links stay valid)
+- [x] File lock check - skip files currently in use by another process
+- [x] Single-instance guard - prevent duplicate processes & tray icons
+- [x] First-run popup visibility - show window on initial launch
 - [ ] Scheduled clean mode - run once/2/3/4 times per day instead of real-time
 - [ ] Batch group selected files - select multiple files, one click to group into a folder
 - [ ] Export/import rules as JSON (backup + sharing)
