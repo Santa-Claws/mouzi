@@ -88,6 +88,9 @@ pub fn scan_file(path: &Path) -> Option<FileInfo> {
         return None;
     }
     let metadata = fs::metadata(path).ok()?;
+    if metadata.len() == 0 {
+        return None; // Skip empty placeholder files (e.g. browser download stubs)
+    }
     let name = path.file_name()?.to_string_lossy().to_string();
     let extension = path
         .extension()

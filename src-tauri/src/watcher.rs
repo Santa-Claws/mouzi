@@ -56,6 +56,7 @@ impl FolderWatcher {
                 let mut organized_count = 0;
                 let mut last_file_name = String::new();
                 let mut last_rule_name = String::new();
+                let mut last_destination = String::new();
 
                 for path in to_process {
                     if path.exists() && path.is_file() {
@@ -67,6 +68,7 @@ impl FolderWatcher {
                                     .to_string();
                                 last_file_name = file_name.clone();
                                 last_rule_name = rule.name.clone();
+                                last_destination = dest.clone();
                                 organized_count += 1;
                                 let _ = handle.emit("file-organized", serde_json::json!({
                                     "file": file_name,

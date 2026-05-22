@@ -13,8 +13,10 @@ import {
   Archive,
   Package,
   File,
+  ExternalLink,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 function getIconForType(typeName: string) {
   const lower = typeName.toLowerCase();
@@ -43,11 +45,32 @@ export default function Popup() {
   const [scanResults, setScanResults] = useState<
     { file: string; rule: string; destination: string }[]
   >([]);
+  const [toast, setToast] = useState<{
+    file: string;
+    rule: string;
+    destination: string;
+  } | null>(null);
 
   useEffect(() => {
     loadLogs();
     loadStats();
     loadFolders();
+
+    const unlisten = listen("file-organized", (event: any) => {
+      const payload = event.payload;
+      if (payload?.success) {
+        setToast({
+          file: payload.file,
+          rule: payload.rule,
+          destination: payload.destination,
+        });
+        setTimeout(() => setToast(null), 6000);
+      }
+    });
+
+    return () => {
+      unlisten.then((f) => f());
+    };
   }, [loadLogs, loadStats, loadFolders]);
 
   const handleClean = async () => {
@@ -176,6 +199,28 @@ export default function Popup() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Clickable toast for auto-organized files */}
+      {toast && (
+        <div className="px-3 pb-2">
+          <button
+            onClick={async () => {
+              const folder = toast.destination.substring(0, toast.destination.lastIndexOf("\\")) || toast.destination;
+              await invoke("open_folder_cmd", { path: folder });
+              setToast(null);
+            }}
+            className="w-full text-left rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs hover:bg-primary/20 transition-colors"
+          >
+            <div className="flex items-center gap-1.5 text-primary">
+              <ExternalLink size={12} />
+              <span className="font-medium">Organized: {toast.file}</span>
+            </div>
+            <div className="text-text-muted mt-0.5 truncate">
+              Click to open folder → {toast.destination}
+            </div>
+          </button>
         </div>
       )}
 

@@ -84,9 +84,9 @@ Auto-detects your Windows system language. Supported:
 **SHA-256 Checksums**
 
 ```
-Mouzi_0.1.0_x64-setup.exe: cbab078b6d58aaf9b5acac3ca7c060f5c72ce2eb6c7ac8bd23267550d90b05c5
-Mouzi_0.1.0_x64_en-US.msi: 1508e9da9538c4090a3a8b198b70e65da15f700943d28787a47556516e1383de
-Mouzi_0.1.0_x64-portable.exe: a708a3ccf86d58875f0d6e8608d2b1aa4359a0bbde316ce76977bd4db335ac4b
+Mouzi_0.1.0_x64-setup.exe: e8c1bdecdb14eba23f53955a8270d1681e2026a49169ac994820cf8cc6e8bc28
+Mouzi_0.1.0_x64_en-US.msi: a5c33c23bf93a5a10bd6534161a058dbd35fbc85b4fa2e5a11f0ddfd6bebe2d3
+Mouzi_0.1.0_x64-portable.exe: 677649351d02076f2dc16b1487606f4173af699cb46535f8692eacd5dcc1c50b
 ```
 
 > ⚠️ **Windows 10/11 only.** Requires the [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on most systems).
@@ -189,6 +189,8 @@ Output will be in `src-tauri/target/release/bundle/`.
 - [x] File lock check - skip files currently in use by another process
 - [x] Single-instance guard - prevent duplicate processes & tray icons
 - [x] First-run popup visibility - show window on initial launch
+- [x] Clickable toast - open destination folder from popup notification
+- [x] Skip 0KB placeholder files during download
 - [ ] Scheduled clean mode - run once/2/3/4 times per day instead of real-time
 - [ ] Batch group selected files - select multiple files, one click to group into a folder
 - [ ] Export/import rules as JSON (backup + sharing)
