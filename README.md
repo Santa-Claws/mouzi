@@ -191,6 +191,7 @@ Output will be in `src-tauri/target/release/bundle/`.
 - [x] First-run popup visibility - show window on initial launch
 - [x] Clickable toast - open destination folder from popup notification
 - [x] Skip 0KB placeholder files during download
+- [ ] Per-folder manual/paused mode - collect files but don't move until user clicks Clean Now
 - [ ] Scheduled clean mode - run once/2/3/4 times per day instead of real-time
 - [ ] Batch group selected files - select multiple files, one click to group into a folder
 - [ ] Export/import rules as JSON (backup + sharing)
