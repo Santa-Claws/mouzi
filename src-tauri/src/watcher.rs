@@ -6,7 +6,6 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::Emitter;
-use tauri_plugin_notification::NotificationExt;
 
 const IGNORE_DURATION_SECS: u64 = 5;
 
@@ -53,11 +52,6 @@ impl FolderWatcher {
                     ready.into_iter().map(|p| p.path).collect()
                 };
 
-                let mut organized_count = 0;
-                let mut last_file_name = String::new();
-                let mut last_rule_name = String::new();
-                let mut last_destination = String::new();
-
                 for path in to_process {
                     if path.exists() && path.is_file() {
                         match process_file(&path) {
@@ -66,10 +60,6 @@ impl FolderWatcher {
                                     .unwrap_or_default()
                                     .to_string_lossy()
                                     .to_string();
-                                last_file_name = file_name.clone();
-                                last_rule_name = rule.name.clone();
-                                last_destination = dest.clone();
-                                organized_count += 1;
                                 let dest_folder = std::path::Path::new(&dest)
                                     .parent()
                                     .map(|p| p.to_string_lossy().to_string())
@@ -78,6 +68,8 @@ impl FolderWatcher {
                                             .map(|p| p.to_string_lossy().to_string())
                                             .unwrap_or_default()
                                     });
+                                // Emit event to frontend — JS will show the notification
+                                // with actionTypeId so clicking it opens the destination folder
                                 let _ = handle.emit("file-organized", serde_json::json!({
                                     "file": file_name,
                                     "rule": rule.name,
@@ -96,20 +88,6 @@ impl FolderWatcher {
                             }
                         }
                     }
-                }
-
-                if organized_count > 0 {
-                    let body = if organized_count == 1 {
-                        format!("{} → {}", last_file_name, last_rule_name)
-                    } else {
-                        format!("Organized {} files", organized_count)
-                    };
-                    let _ = handle
-                        .notification()
-                        .builder()
-                        .title("Mouzi")
-                        .body(body)
-                        .show();
                 }
             }
         });

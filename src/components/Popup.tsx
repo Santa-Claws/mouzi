@@ -17,6 +17,15 @@ import {
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import {
+  registerActionTypes,
+  onAction,
+  sendNotification,
+} from "@tauri-apps/plugin-notification";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
+
+const NOTIF_ACTION_TYPE = "mouzi-open-folder";
+const NOTIF_ACTION_ID = "open-folder";
 
 function getIconForType(typeName: string) {
   const lower = typeName.toLowerCase();
@@ -52,36 +61,82 @@ export default function Popup() {
     destination_folder: string;
   } | null>(null);
 
-  // Debug: log toast state changes
-  useEffect(() => {
-    if (toast) {
-      console.log("[Toast] showing:", toast);
-    }
-  }, [toast]);
-
   useEffect(() => {
     loadLogs();
     loadStats();
     loadFolders();
 
+    let actionListener: { unregister: () => Promise<void> } | null = null;
+
+    // 1. Register the action type for "open folder" notifications
+    registerActionTypes([
+      {
+        id: NOTIF_ACTION_TYPE,
+        actions: [
+          {
+            id: NOTIF_ACTION_ID,
+            title: "Open Folder",
+          },
+        ],
+      },
+    ]).catch(console.error);
+
+    // 2. Listen for notification action clicks (user clicked notification or its button)
+    onAction((notification) => {
+      // destination folder is stored in extra.destFolder
+      const destFolder = (notification.extra as Record<string, unknown> | undefined)?.destFolder as string | undefined;
+      if (destFolder) {
+        revealItemInDir(destFolder).catch(() => {
+          // fallback to open_folder_cmd if revealItemInDir fails
+          invoke("open_folder_cmd", { path: destFolder }).catch(console.error);
+        });
+      }
+    }).then((listener) => {
+      actionListener = listener;
+    }).catch(console.error);
+
+    // 3. Listen for file-organized events from Rust watcher
     const unlisten = listen("file-organized", (event: any) => {
-      alert("EVENT: " + JSON.stringify(event.payload));
       const payload = event.payload;
       if (payload?.success) {
+        const destFolder: string =
+          payload.destination_folder || payload.destination;
+
+        const body =
+          payload.file && payload.rule
+            ? `${payload.file} → ${payload.rule}`
+            : payload.file || "File organized";
+
+        // Send system notification with actionTypeId and extra payload
+        // so clicking it fires onAction with destFolder
+        sendNotification({
+          title: "Mouzi",
+          body,
+          actionTypeId: NOTIF_ACTION_TYPE,
+          extra: { destFolder },
+        });
+
+        // Also show in-app toast
         setToast({
           file: payload.file,
           rule: payload.rule,
           destination: payload.destination,
-          destination_folder: payload.destination_folder || payload.destination,
+          destination_folder: destFolder,
         });
         setTimeout(() => setToast(null), 30000);
+
+        loadLogs();
+        loadStats();
       }
     });
 
     return () => {
       unlisten.then((f) => f());
+      actionListener?.unregister().catch(console.error);
     };
   }, [loadLogs, loadStats, loadFolders]);
+
+
 
   const handleClean = async () => {
     let allResults: { file: string; rule: string; destination: string }[] = [];
@@ -217,11 +272,11 @@ export default function Popup() {
         <div className="px-3 pb-2">
           <div
             onPointerDown={async () => {
-              alert("POINTER DOWN: " + toast.destination_folder);
               try {
-                await invoke("open_folder_cmd", { path: toast.destination_folder });
-              } catch (e) {
-                alert("ERROR: " + String(e));
+                await revealItemInDir(toast.destination_folder);
+              } catch {
+                // fallback
+                await invoke("open_folder_cmd", { path: toast.destination_folder }).catch(console.error);
               }
               setToast(null);
             }}
@@ -244,7 +299,7 @@ export default function Popup() {
               </button>
             </div>
             <div className="text-text-muted mt-0.5 truncate">
-              Click to open folder → {toast.destination}
+              Click to open → {toast.destination_folder}
             </div>
           </div>
         </div>

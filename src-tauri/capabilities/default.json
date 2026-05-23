@@ -6,7 +6,12 @@
   "permissions": [
     "core:default",
     "opener:default",
+    "opener:allow-reveal-item-in-dir",
+    "opener:allow-open-path",
     "notification:default",
+    "notification:allow-register-action-types",
+    "notification:allow-show",
+    "notification:allow-request-permission",
     "core:window:default",
     "core:window:allow-show",
     "core:window:allow-hide",
