@@ -6,6 +6,7 @@ use std::time::Instant;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_notification::NotificationExt;
+use tauri_plugin_opener::OpenerExt;
 
 #[tauri::command]
 pub fn greet(name: &str) -> String {
@@ -155,11 +156,10 @@ pub fn scan_folder_cmd(path: String) -> Result<Vec<(String, String, String)>, St
 }
 
 #[tauri::command]
-pub fn open_folder_cmd(path: String) -> Result<(), String> {
-    let _ = std::process::Command::new("explorer")
-        .arg(path)
-        .spawn();
-    Ok(())
+pub fn open_folder_cmd(app: AppHandle, path: String) -> Result<(), String> {
+    app.opener()
+        .open_path(&path, None::<&str>)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

@@ -84,9 +84,9 @@ Auto-detects your Windows system language. Supported:
 **SHA-256 Checksums**
 
 ```
-Mouzi_0.1.0_x64-setup.exe: 94c68b065cb03913f4b83cbbcfc6e1cba114854c598878be98a97634c30a8662
-Mouzi_0.1.0_x64_en-US.msi: ccd9e53507ead799418fc85bff3171ee932b86032b56b1a6f184c16d770e48fc
-Mouzi_0.1.0_x64-portable.exe: 368f4ae3e0535b20e90f36f69f4a562cc74f4dd5d2e13abab1ef3894d6b4d4db
+Mouzi_0.1.0_x64-setup.exe: ddb4af087a108475ab356603c164da72647354895b2bd31eed3c8765fbfe1ed3
+Mouzi_0.1.0_x64_en-US.msi: 5296895986ca1774a614cdaa91f3bf41649ef535340d214d71b7aa7773dd51bb
+Mouzi_0.1.0_x64-portable.exe: 030eabc17b7b5fa0e6354526f69f8bf225c88cfbf7adfedb5a01fcecf1b7da97
 ```
 
 > ⚠️ **Windows 10/11 only.** Requires the [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on most systems).
