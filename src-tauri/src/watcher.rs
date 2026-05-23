@@ -70,10 +70,19 @@ impl FolderWatcher {
                                 last_rule_name = rule.name.clone();
                                 last_destination = dest.clone();
                                 organized_count += 1;
+                                let dest_folder = std::path::Path::new(&dest)
+                                    .parent()
+                                    .map(|p| p.to_string_lossy().to_string())
+                                    .unwrap_or_else(|| {
+                                        path.parent()
+                                            .map(|p| p.to_string_lossy().to_string())
+                                            .unwrap_or_default()
+                                    });
                                 let _ = handle.emit("file-organized", serde_json::json!({
                                     "file": file_name,
                                     "rule": rule.name,
                                     "destination": dest,
+                                    "destination_folder": dest_folder,
                                     "success": true
                                 }));
                             }

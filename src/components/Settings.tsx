@@ -426,7 +426,7 @@ export default function Settings() {
                     Grace period
                   </label>
                   <span className="text-xs text-text-muted">
-                    {settings?.grace_period_seconds
+                    {settings?.grace_period_seconds !== undefined
                       ? settings.grace_period_seconds >= 60
                         ? `${(settings.grace_period_seconds / 60).toFixed(0)} min`
                         : `${settings.grace_period_seconds}s`

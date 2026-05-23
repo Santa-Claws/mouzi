@@ -49,6 +49,7 @@ export default function Popup() {
     file: string;
     rule: string;
     destination: string;
+    destination_folder: string;
   } | null>(null);
 
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function Popup() {
           file: payload.file,
           rule: payload.rule,
           destination: payload.destination,
+          destination_folder: payload.destination_folder || payload.destination,
         });
         setTimeout(() => setToast(null), 6000);
       }
@@ -207,8 +209,7 @@ export default function Popup() {
         <div className="px-3 pb-2">
           <button
             onClick={async () => {
-              const folder = toast.destination.substring(0, toast.destination.lastIndexOf("\\")) || toast.destination;
-              await invoke("open_folder_cmd", { path: folder });
+              await invoke("open_folder_cmd", { path: toast.destination_folder });
               setToast(null);
             }}
             className="w-full text-left rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs hover:bg-primary/20 transition-colors"
