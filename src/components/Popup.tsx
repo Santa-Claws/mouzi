@@ -73,7 +73,7 @@ export default function Popup() {
           destination: payload.destination,
           destination_folder: payload.destination_folder || payload.destination,
         });
-        setTimeout(() => setToast(null), 6000);
+        setTimeout(() => setToast(null), 30000);
       }
     });
 
@@ -214,28 +214,38 @@ export default function Popup() {
       {/* Clickable toast for auto-organized files */}
       {toast && (
         <div className="px-3 pb-2">
-          <button
-            onClick={async () => {
-              console.log("[Toast] clicked, path:", toast.destination_folder);
+          <div
+            onPointerDown={async () => {
+              alert("POINTER DOWN: " + toast.destination_folder);
               try {
                 await invoke("open_folder_cmd", { path: toast.destination_folder });
-                console.log("[Toast] open_folder_cmd OK");
               } catch (e) {
-                console.error("[Toast] open_folder_cmd failed:", e);
-                alert("Open folder failed: " + String(e));
+                alert("ERROR: " + String(e));
               }
               setToast(null);
             }}
-            className="w-full text-left rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs hover:bg-primary/20 transition-colors"
+            className="w-full text-left rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs hover:bg-primary/20 transition-colors cursor-pointer"
+            role="button"
           >
-            <div className="flex items-center gap-1.5 text-primary">
-              <ExternalLink size={12} />
-              <span className="font-medium">Organized: {toast.file}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-primary">
+                <ExternalLink size={12} />
+                <span className="font-medium">Organized: {toast.file}</span>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setToast(null);
+                }}
+                className="p-0.5 rounded hover:bg-primary/20 text-primary"
+              >
+                <X size={10} />
+              </button>
             </div>
             <div className="text-text-muted mt-0.5 truncate">
               Click to open folder → {toast.destination}
             </div>
-          </button>
+          </div>
         </div>
       )}
 
