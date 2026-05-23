@@ -65,6 +65,7 @@ export default function Popup() {
     loadFolders();
 
     const unlisten = listen("file-organized", (event: any) => {
+      alert("EVENT: " + JSON.stringify(event.payload));
       const payload = event.payload;
       if (payload?.success) {
         setToast({
