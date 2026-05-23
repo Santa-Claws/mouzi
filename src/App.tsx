@@ -5,6 +5,7 @@ import Popup from "./components/Popup";
 import Settings from "./components/Settings";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
+import { onAction } from "@tauri-apps/plugin-notification";
 
 function applyTheme(theme: string) {
   const root = document.documentElement;
@@ -53,6 +54,20 @@ function App() {
       useAppStore.getState().loadStats();
     });
 
+    let actionListener: { unregister: () => Promise<void> } | null = null;
+
+    // Listen for notification action clicks centrally
+    onAction((notification) => {
+      console.log("Notification click received:", notification);
+      const destFolder = (notification.extra as Record<string, unknown> | undefined)?.destFolder as string | undefined;
+      if (destFolder) {
+        invoke("open_folder_cmd", { path: destFolder })
+          .catch((e) => console.error("open_folder_cmd from onAction failed:", e));
+      }
+    }).then((listener) => {
+      actionListener = listener;
+    }).catch(console.error);
+
     // When the popup window gains focus (e.g. after notification click brings app forward),
     // check if there's a pending folder to open. This covers the case where the app window
     // was already visible and single-instance handler didn't fire.
@@ -73,6 +88,9 @@ function App() {
     return () => {
       unlisten.then((f) => f());
       window.removeEventListener("focus", handleFocus);
+      if (actionListener) {
+        actionListener.unregister().catch(console.error);
+      }
     };
   }, []);
 

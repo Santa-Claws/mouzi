@@ -252,3 +252,8 @@ pub fn save_mouziignore_cmd(folder_path: String, patterns: Vec<String>) -> Resul
 pub fn get_pending_open_folder_cmd(state: tauri::State<AppState>) -> Option<String> {
     state.pending_open_folder.lock().unwrap().take()
 }
+
+#[tauri::command]
+pub fn show_popup_cmd(app: AppHandle) {
+    crate::tray::show_popup_window(&app);
+}

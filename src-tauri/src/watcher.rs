@@ -112,19 +112,43 @@ impl FolderWatcher {
                 if organized_count > 0 {
                     // Store the destination folder so single-instance handler can open it
                     // when the user clicks the notification (Windows activates the app)
-                    *pending_open_folder.lock().unwrap() = Some(last_dest_folder);
+                    *pending_open_folder.lock().unwrap() = Some(last_dest_folder.clone());
 
                     let body = if organized_count == 1 {
                         format!("{} → {}", last_file_name, last_rule_name)
                     } else {
                         format!("Organized {} files", organized_count)
                     };
-                    let _ = handle
-                        .notification()
-                        .builder()
-                        .title("Mouzi – click to open folder")
-                        .body(body)
-                        .show();
+
+                    #[cfg(target_os = "windows")]
+                    {
+                        let dest_folder_clone = last_dest_folder.clone();
+                        let body_clone = body.clone();
+                        let _ = std::thread::spawn(move || {
+                            let _ = tauri_winrt_notification::Toast::new("cc.mouzi.app")
+                                .title("Mouzi – click to open folder")
+                                .text1(&body_clone)
+                                .on_activated(move |_action| {
+                                    // Open the folder in Explorer robustly
+                                    let _ = std::process::Command::new("cmd")
+                                        .args(["/c", "start", "", &dest_folder_clone])
+                                        .spawn();
+                                    Ok(())
+                                })
+                                .show();
+                        });
+                    }
+
+                    #[cfg(not(target_os = "windows"))]
+                    {
+                        let _ = handle
+                            .notification()
+                            .builder()
+                            .title("Mouzi – click to open folder")
+                            .body(body)
+                            .extra("destFolder", last_dest_folder)
+                            .show();
+                    }
                 }
             }
         });

@@ -39,10 +39,19 @@ pub fn run() {
             if let Some(state) = app.try_state::<AppState>() {
                 let folder = state.pending_open_folder.lock().unwrap().take();
                 if let Some(path) = folder {
-                    // Open the destination folder in Explorer
-                    let _ = std::process::Command::new("explorer")
-                        .arg(&path)
-                        .spawn();
+                    // Open the destination folder in Explorer robustly
+                    #[cfg(target_os = "windows")]
+                    {
+                        let _ = std::process::Command::new("cmd")
+                            .args(["/c", "start", "", &path])
+                            .spawn();
+                    }
+                    #[cfg(not(target_os = "windows"))]
+                    {
+                        let _ = std::process::Command::new("xdg-open")
+                            .arg(&path)
+                            .spawn();
+                    }
                 }
             }
             // Bring popup window to focus
@@ -144,6 +153,7 @@ pub fn run() {
             load_mouziignore_cmd,
             save_mouziignore_cmd,
             get_pending_open_folder_cmd,
+            show_popup_cmd,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

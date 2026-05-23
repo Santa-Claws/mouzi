@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { onAction } from "@tauri-apps/plugin-notification";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 function getIconForType(typeName: string) {
@@ -59,21 +58,6 @@ export default function Popup() {
     loadStats();
     loadFolders();
 
-    let actionListener: { unregister: () => Promise<void> } | null = null;
-
-    // Best-effort: on some platforms/configs, onAction fires when user clicks the notification.
-    // The primary mechanism on Windows is the single-instance handler in Rust (lib.rs).
-    onAction((notification) => {
-      const destFolder = (notification.extra as Record<string, unknown> | undefined)?.destFolder as string | undefined;
-      if (destFolder) {
-        revealItemInDir(destFolder).catch(() => {
-          invoke("open_folder_cmd", { path: destFolder }).catch(console.error);
-        });
-      }
-    }).then((listener) => {
-      actionListener = listener;
-    }).catch(console.error);
-
     // Listen for file-organized events from Rust watcher — show in-app toast
     const unlisten = listen("file-organized", (event: any) => {
       const payload = event.payload;
@@ -94,7 +78,6 @@ export default function Popup() {
 
     return () => {
       unlisten.then((f) => f());
-      actionListener?.unregister().catch(console.error);
     };
   }, [loadLogs, loadStats, loadFolders]);
 
