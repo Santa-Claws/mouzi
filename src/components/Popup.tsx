@@ -17,15 +17,8 @@ import {
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import {
-  registerActionTypes,
-  onAction,
-  sendNotification,
-} from "@tauri-apps/plugin-notification";
+import { onAction } from "@tauri-apps/plugin-notification";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
-
-const NOTIF_ACTION_TYPE = "mouzi-open-folder";
-const NOTIF_ACTION_ID = "open-folder";
 
 function getIconForType(typeName: string) {
   const lower = typeName.toLowerCase();
@@ -68,26 +61,12 @@ export default function Popup() {
 
     let actionListener: { unregister: () => Promise<void> } | null = null;
 
-    // 1. Register the action type for "open folder" notifications
-    registerActionTypes([
-      {
-        id: NOTIF_ACTION_TYPE,
-        actions: [
-          {
-            id: NOTIF_ACTION_ID,
-            title: "Open Folder",
-          },
-        ],
-      },
-    ]).catch(console.error);
-
-    // 2. Listen for notification action clicks (user clicked notification or its button)
+    // Best-effort: on some platforms/configs, onAction fires when user clicks the notification.
+    // The primary mechanism on Windows is the single-instance handler in Rust (lib.rs).
     onAction((notification) => {
-      // destination folder is stored in extra.destFolder
       const destFolder = (notification.extra as Record<string, unknown> | undefined)?.destFolder as string | undefined;
       if (destFolder) {
         revealItemInDir(destFolder).catch(() => {
-          // fallback to open_folder_cmd if revealItemInDir fails
           invoke("open_folder_cmd", { path: destFolder }).catch(console.error);
         });
       }
@@ -95,28 +74,12 @@ export default function Popup() {
       actionListener = listener;
     }).catch(console.error);
 
-    // 3. Listen for file-organized events from Rust watcher
+    // Listen for file-organized events from Rust watcher — show in-app toast
     const unlisten = listen("file-organized", (event: any) => {
       const payload = event.payload;
       if (payload?.success) {
-        const destFolder: string =
-          payload.destination_folder || payload.destination;
-
-        const body =
-          payload.file && payload.rule
-            ? `${payload.file} → ${payload.rule}`
-            : payload.file || "File organized";
-
-        // Send system notification with actionTypeId and extra payload
-        // so clicking it fires onAction with destFolder
-        sendNotification({
-          title: "Mouzi",
-          body,
-          actionTypeId: NOTIF_ACTION_TYPE,
-          extra: { destFolder },
-        });
-
-        // Also show in-app toast
+        const destFolder: string = payload.destination_folder || payload.destination;
+        // Show in-app toast (popup must be open/visible for this to appear)
         setToast({
           file: payload.file,
           rule: payload.rule,
@@ -124,7 +87,6 @@ export default function Popup() {
           destination_folder: destFolder,
         });
         setTimeout(() => setToast(null), 30000);
-
         loadLogs();
         loadStats();
       }

@@ -245,3 +245,10 @@ pub fn load_mouziignore_cmd(folder_path: String) -> Result<Vec<String>, String> 
 pub fn save_mouziignore_cmd(folder_path: String, patterns: Vec<String>) -> Result<(), String> {
     save_mouziignore(&folder_path, &patterns)
 }
+
+/// Returns and clears the pending folder path that should be opened after a notification click.
+/// The frontend calls this when the popup is shown/focused to handle the in-app flow as a backup.
+#[tauri::command]
+pub fn get_pending_open_folder_cmd(state: tauri::State<AppState>) -> Option<String> {
+    state.pending_open_folder.lock().unwrap().take()
+}

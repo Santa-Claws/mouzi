@@ -18,11 +18,14 @@ use watcher::FolderWatcher;
 pub struct AppState {
     pub watcher: Arc<Mutex<FolderWatcher>>,
     pub ignored_files: Arc<Mutex<HashMap<String, Instant>>>,
+    /// Last destination folder waiting to be opened when app is activated by notification click
+    pub pending_open_folder: Arc<Mutex<Option<String>>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let ignored_files = Arc::new(Mutex::new(HashMap::new()));
+    let pending_open_folder: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -31,7 +34,18 @@ pub fn run() {
             Some(vec!["--autostart"]),
         ))
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            // Bring existing window to focus when user tries to launch a second instance
+            // When Windows activates the app (e.g. user clicked a notification),
+            // open any pending folder first, then show the popup.
+            if let Some(state) = app.try_state::<AppState>() {
+                let folder = state.pending_open_folder.lock().unwrap().take();
+                if let Some(path) = folder {
+                    // Open the destination folder in Explorer
+                    let _ = std::process::Command::new("explorer")
+                        .arg(&path)
+                        .spawn();
+                }
+            }
+            // Bring popup window to focus
             if let Some(window) = app.get_webview_window("popup") {
                 let _ = window.show();
                 let _ = window.set_focus();
@@ -41,8 +55,12 @@ pub fn run() {
             }
         }))
         .manage(AppState {
-            watcher: Arc::new(Mutex::new(FolderWatcher::new(ignored_files.clone()))),
+            watcher: Arc::new(Mutex::new(FolderWatcher::new(
+                ignored_files.clone(),
+                pending_open_folder.clone(),
+            ))),
             ignored_files,
+            pending_open_folder,
         })
         .setup(|app| {
             let app_handle = app.handle().clone();
@@ -125,6 +143,7 @@ pub fn run() {
             show_notification,
             load_mouziignore_cmd,
             save_mouziignore_cmd,
+            get_pending_open_folder_cmd,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

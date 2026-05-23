@@ -4,6 +4,7 @@ import { useAppStore } from "./store/useAppStore";
 import Popup from "./components/Popup";
 import Settings from "./components/Settings";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 
 function applyTheme(theme: string) {
   const root = document.documentElement;
@@ -51,8 +52,27 @@ function App() {
       useAppStore.getState().loadLogs();
       useAppStore.getState().loadStats();
     });
+
+    // When the popup window gains focus (e.g. after notification click brings app forward),
+    // check if there's a pending folder to open. This covers the case where the app window
+    // was already visible and single-instance handler didn't fire.
+    const handleFocus = async () => {
+      try {
+        const folder = await invoke<string | null>("get_pending_open_folder_cmd");
+        if (folder) {
+          // Open the folder in Explorer
+          await invoke("open_folder_cmd", { path: folder }).catch(console.error);
+        }
+      } catch (e) {
+        console.error("get_pending_open_folder_cmd error:", e);
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+
     return () => {
       unlisten.then((f) => f());
+      window.removeEventListener("focus", handleFocus);
     };
   }, []);
 

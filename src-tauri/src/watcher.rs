@@ -6,6 +6,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::Emitter;
+use tauri_plugin_notification::NotificationExt;
 
 const IGNORE_DURATION_SECS: u64 = 5;
 
@@ -19,15 +20,21 @@ pub struct FolderWatcher {
     watchers: HashMap<String, RecommendedWatcher>,
     pending: Arc<Mutex<Vec<PendingFile>>>,
     ignored_files: Arc<Mutex<HashMap<String, Instant>>>,
+    /// Shared with AppState — stores the last destination folder to open on notification click
+    pending_open_folder: Arc<Mutex<Option<String>>>,
     handle: Option<std::thread::JoinHandle<()>>,
 }
 
 impl FolderWatcher {
-    pub fn new(ignored_files: Arc<Mutex<HashMap<String, Instant>>>) -> Self {
+    pub fn new(
+        ignored_files: Arc<Mutex<HashMap<String, Instant>>>,
+        pending_open_folder: Arc<Mutex<Option<String>>>,
+    ) -> Self {
         Self {
             watchers: HashMap::new(),
             pending: Arc::new(Mutex::new(Vec::new())),
             ignored_files,
+            pending_open_folder,
             handle: None,
         }
     }
@@ -35,6 +42,7 @@ impl FolderWatcher {
     pub fn start(&mut self, app_handle: tauri::AppHandle) {
         let pending = self.pending.clone();
         let handle = app_handle.clone();
+        let pending_open_folder = self.pending_open_folder.clone();
 
         // Spawn a thread that processes pending files after a delay
         let handle_thread = std::thread::spawn(move || {
@@ -52,6 +60,11 @@ impl FolderWatcher {
                     ready.into_iter().map(|p| p.path).collect()
                 };
 
+                let mut organized_count = 0;
+                let mut last_file_name = String::new();
+                let mut last_rule_name = String::new();
+                let mut last_dest_folder = String::new();
+
                 for path in to_process {
                     if path.exists() && path.is_file() {
                         match process_file(&path) {
@@ -68,8 +81,13 @@ impl FolderWatcher {
                                             .map(|p| p.to_string_lossy().to_string())
                                             .unwrap_or_default()
                                     });
-                                // Emit event to frontend — JS will show the notification
-                                // with actionTypeId so clicking it opens the destination folder
+
+                                last_file_name = file_name.clone();
+                                last_rule_name = rule.name.clone();
+                                last_dest_folder = dest_folder.clone();
+                                organized_count += 1;
+
+                                // Emit event to frontend (in-app toast)
                                 let _ = handle.emit("file-organized", serde_json::json!({
                                     "file": file_name,
                                     "rule": rule.name,
@@ -88,6 +106,25 @@ impl FolderWatcher {
                             }
                         }
                     }
+                }
+
+                // Show a single notification for this batch
+                if organized_count > 0 {
+                    // Store the destination folder so single-instance handler can open it
+                    // when the user clicks the notification (Windows activates the app)
+                    *pending_open_folder.lock().unwrap() = Some(last_dest_folder);
+
+                    let body = if organized_count == 1 {
+                        format!("{} → {}", last_file_name, last_rule_name)
+                    } else {
+                        format!("Organized {} files", organized_count)
+                    };
+                    let _ = handle
+                        .notification()
+                        .builder()
+                        .title("Mouzi – click to open folder")
+                        .body(body)
+                        .show();
                 }
             }
         });
