@@ -6,7 +6,6 @@ use std::time::Instant;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_notification::NotificationExt;
-use tauri_plugin_opener::OpenerExt;
 
 #[tauri::command]
 pub fn greet(name: &str) -> String {
@@ -156,10 +155,26 @@ pub fn scan_folder_cmd(path: String) -> Result<Vec<(String, String, String)>, St
 }
 
 #[tauri::command]
-pub fn open_folder_cmd(app: AppHandle, path: String) -> Result<(), String> {
-    app.opener()
-        .open_path(&path, None::<&str>)
-        .map_err(|e| e.to_string())
+pub fn open_folder_cmd(path: String) -> Result<(), String> {
+    if path.is_empty() {
+        return Err("Path is empty".to_string());
+    }
+    #[cfg(target_os = "windows")]
+    {
+        // Use 'cmd /c start' which is the most reliable way to open folders on Windows
+        std::process::Command::new("cmd")
+            .args(["/c", "start", "", &path])
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 #[tauri::command]
