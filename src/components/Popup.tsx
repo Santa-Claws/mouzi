@@ -52,6 +52,13 @@ export default function Popup() {
     destination_folder: string;
   } | null>(null);
 
+  // Debug: log toast state changes
+  useEffect(() => {
+    if (toast) {
+      console.log("[Toast] showing:", toast);
+    }
+  }, [toast]);
+
   useEffect(() => {
     loadLogs();
     loadStats();
@@ -209,7 +216,14 @@ export default function Popup() {
         <div className="px-3 pb-2">
           <button
             onClick={async () => {
-              await invoke("open_folder_cmd", { path: toast.destination_folder });
+              console.log("[Toast] clicked, path:", toast.destination_folder);
+              try {
+                await invoke("open_folder_cmd", { path: toast.destination_folder });
+                console.log("[Toast] open_folder_cmd OK");
+              } catch (e) {
+                console.error("[Toast] open_folder_cmd failed:", e);
+                alert("Open folder failed: " + String(e));
+              }
               setToast(null);
             }}
             className="w-full text-left rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs hover:bg-primary/20 transition-colors"
