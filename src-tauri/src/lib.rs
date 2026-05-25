@@ -1,5 +1,6 @@
 pub mod commands;
 pub mod db;
+pub mod i18n;
 pub mod ignore;
 pub mod rules;
 pub mod tray;
@@ -98,7 +99,10 @@ pub fn run() {
             };
 
             // Setup system tray
-            tray::setup_tray(&app_handle)?;
+            let tray_lang = db::get_settings()
+                .map(|s| s.language)
+                .unwrap_or_else(|_| "en".to_string());
+            tray::setup_tray(&app_handle, &tray_lang)?;
 
             // On first launch, show the popup so the user knows the app is running
             if is_first_run {
