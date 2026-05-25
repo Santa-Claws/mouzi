@@ -231,7 +231,7 @@ export default function Popup() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-primary">
                 <ExternalLink size={12} />
-                <span className="font-medium">Organized: {toast.file}</span>
+                <span className="font-medium">{t("popup.organized", { file: toast.file })}</span>
               </div>
               <button
                 onClick={(e) => {
@@ -244,7 +244,7 @@ export default function Popup() {
               </button>
             </div>
             <div className="text-text-muted mt-0.5 truncate">
-              Click to open → {toast.destination_folder}
+              {t("popup.openFolder", { folder: toast.destination_folder })}
             </div>
           </div>
         </div>

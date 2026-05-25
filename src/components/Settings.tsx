@@ -114,7 +114,7 @@ export default function Settings() {
             active={tab === "ignore"}
             onClick={() => setTab("ignore")}
             icon={<X size={16} />}
-            label="Ignore"
+            label={t("settings.ignore.title")}
           />
           <SidebarButton
             active={tab === "general"}
@@ -135,7 +135,7 @@ export default function Settings() {
                 type="text"
                 value={newFolderPath}
                 onChange={(e) => setNewFolderPath(e.target.value)}
-                placeholder="C:/Users/.../Downloads"
+                placeholder={t("settings.folders.placeholder")}
                 className="flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
               />
               <button
@@ -259,7 +259,7 @@ export default function Settings() {
                     className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-surface"
                   >
                     <X size={14} />
-                    Cancel
+                    {t("common.cancel")}
                   </button>
                 </div>
               </div>
@@ -276,7 +276,7 @@ export default function Settings() {
                       <span className="text-sm font-medium">{r.name}</span>
                       {!r.enabled && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-border text-text-muted">
-                          OFF
+                          {t("common.off")}
                         </span>
                       )}
                     </div>
@@ -314,7 +314,7 @@ export default function Settings() {
                   className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm text-text hover:bg-surface-dark"
                 >
                   <RotateCcw size={14} />
-                  Revert All
+                  {t("settings.history.revertAll")}
                 </button>
                 <button
                   onClick={clearLogs}
@@ -423,7 +423,7 @@ export default function Settings() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-text-muted">
-                    Grace period
+                    {t("settings.general.gracePeriod")}
                   </label>
                   <span className="text-xs text-text-muted">
                     {settings?.grace_period_seconds !== undefined
@@ -448,7 +448,7 @@ export default function Settings() {
                   className="w-full accent-primary"
                 />
                 <p className="text-xs text-text-muted">
-                  Wait time before moving a file after it was last modified. 0 = instant.
+                  {t("settings.general.gracePeriodDesc")}
                 </p>
               </div>
 
@@ -456,10 +456,10 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-sm font-medium text-text-muted">
-                    Check file lock
+                    {t("settings.general.checkFileLock")}
                   </label>
                   <p className="text-xs text-text-muted">
-                    Skip files currently in use by another process
+                    {t("settings.general.checkFileLockDesc")}
                   </p>
                 </div>
                 <button
@@ -492,16 +492,12 @@ export default function Settings() {
               />
               <div>
                 <h2 className="text-xl font-semibold">Mouzi</h2>
-                <p className="text-sm text-text-muted">Your downloads, tamed.</p>
+                <p className="text-sm text-text-muted">{t("settings.about.tagline")}</p>
               </div>
             </div>
 
             <p className="text-sm text-text-muted leading-relaxed">
-              Mouzi is a silent, elegant file organizer that lives in your system
-              tray and keeps your Downloads folder (and any other folder)
-              automatically tidy. It runs quietly in the background, monitors
-              selected folders, and moves, renames, or sorts files based on
-              customizable rules.
+              {t("settings.about.description")}
             </p>
 
             {/* Check for Updates */}
@@ -514,7 +510,7 @@ export default function Settings() {
               className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text hover:bg-surface-hover transition-colors"
             >
               <Download size={16} className="text-primary" />
-              Check for Updates
+              {t("settings.about.checkUpdates")}
               <ExternalLink size={14} className="ml-auto text-text-muted" />
             </button>
 
@@ -541,10 +537,10 @@ export default function Settings() {
                 className="inline-flex items-center gap-2 rounded-xl bg-[#ff5e5b] px-8 py-3 text-base font-semibold text-white shadow-lg shadow-[#ff5e5b]/20 hover:bg-[#e05451] hover:shadow-xl hover:shadow-[#ff5e5b]/30 hover:-translate-y-0.5 transition-all"
               >
                 <Heart size={20} className="fill-white" />
-                Support Mouzi on Ko-fi
+                {t("settings.about.support")}
               </button>
               <p className="text-xs text-text-muted mt-3">
-                Your support keeps Mouzi improving. Thank you! 🙏
+                {t("settings.about.supportDesc")}
               </p>
             </div>
           </div>
@@ -559,6 +555,7 @@ export default function Settings() {
 }
 
 function IgnoreTab() {
+  const { t } = useTranslation();
   const { folders } = useAppStore();
   const [selectedFolder, setSelectedFolder] = useState("");
   const [patterns, setPatterns] = useState<string[]>([]);
@@ -604,22 +601,21 @@ function IgnoreTab() {
 
   return (
     <div className="space-y-6 max-w-md">
-      <h2 className="text-lg font-semibold">Ignore Rules</h2>
+      <h2 className="text-lg font-semibold">{t("settings.ignore.rulesTitle")}</h2>
       <p className="text-sm text-text-muted">
-        Choose a watched folder and set patterns for files Mouzi should skip.
-        Patterns are saved as a <code>.mouziignore</code> file in that folder.
+        {t("settings.ignore.description")}
       </p>
 
       <div>
         <label className="text-sm font-medium text-text-muted block mb-2">
-          Folder
+          {t("settings.ignore.folder")}
         </label>
         <select
           value={selectedFolder}
           onChange={(e) => setSelectedFolder(e.target.value)}
           className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
         >
-          <option value="">Select a folder...</option>
+          <option value="">{t("settings.ignore.selectFolder")}</option>
           {folders.map((f) => (
             <option key={f.id} value={f.path}>
               {f.path}
@@ -632,11 +628,11 @@ function IgnoreTab() {
         <>
           <div className="space-y-2">
             <label className="text-sm font-medium text-text-muted block">
-              Patterns
+              {t("settings.ignore.patterns")}
             </label>
             {patterns.length === 0 && (
               <p className="text-sm text-text-muted italic">
-                No ignore rules yet. Add one below.
+                {t("settings.ignore.noRules")}
               </p>
             )}
             {patterns.map((p, i) => (
@@ -662,7 +658,7 @@ function IgnoreTab() {
               value={newPattern}
               onChange={(e) => setNewPattern(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-              placeholder="e.g. *.tmp or node_modules/"
+              placeholder={t("settings.ignore.placeholder")}
               className="flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
             />
             <button
@@ -670,13 +666,13 @@ function IgnoreTab() {
               disabled={!newPattern.trim()}
               className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-bg hover:bg-primary/90 disabled:opacity-40 transition-colors"
             >
-              Add
+              {t("settings.ignore.add")}
             </button>
           </div>
 
           <div className="rounded-md border border-border bg-surface p-3">
             <p className="text-xs text-text-muted mb-1">
-              <strong className="text-text">Tips:</strong>
+              <strong className="text-text">{t("settings.ignore.tips")}</strong>
             </p>
             <ul className="text-xs text-text-muted space-y-1 list-disc pl-4">
               <li><code>*.tmp</code> — ignore all .tmp files</li>
@@ -691,7 +687,7 @@ function IgnoreTab() {
             className="flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-bg hover:bg-primary/90 transition-colors"
           >
             <Save size={16} />
-            {saved ? "Saved!" : "Save .mouziignore"}
+            {saved ? t("settings.ignore.saved") : t("settings.ignore.save")}
           </button>
         </>
       )}

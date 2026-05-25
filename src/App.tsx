@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { initI18n, SupportedLang } from "./i18n";
 import { useAppStore } from "./store/useAppStore";
 import Popup from "./components/Popup";
@@ -24,6 +25,7 @@ function applyTheme(theme: string) {
 }
 
 function App() {
+  const { t } = useTranslation();
   const [ready, setReady] = useState(false);
   const { loadSettings, settings } = useAppStore();
 
@@ -97,7 +99,7 @@ function App() {
   if (!ready) {
     return (
       <div className="flex h-full items-center justify-center bg-surface text-text">
-        <div className="animate-pulse text-sm">Mouzi...</div>
+        <div className="animate-pulse text-sm">{t("app.loading")}</div>
       </div>
     );
   }

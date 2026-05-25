@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "Mouzi",
-    "tagline": "Scarichi, dimentichi – lui ricorda"
+    "tagline": "Scarichi, dimentichi – lui ricorda",
+    "loading": "Mouzi..."
   },
   "popup": {
     "title": "Mouzi",
@@ -12,7 +13,9 @@
     "weeklyStats": "Questa settimana",
     "undo": "Annulla",
     "settings": "Impostazioni",
-    "quit": "Esci"
+    "quit": "Esci",
+    "organized": "Organizzato: {{file}}",
+    "openFolder": "Clicca per aprire → {{folder}}"
   },
   "settings": {
     "title": "Impostazioni Mouzi",
@@ -42,17 +45,47 @@
       "clear": "Cancella cronologia",
       "undo": "Annulla",
       "undone": "Annullato",
-      "empty": "Nessuna cronologia"
+      "empty": "Nessuna cronologia",
+      "revertAll": "Annulla tutto"
     },
     "general": {
       "title": "Generale",
       "language": "Lingua",
       "theme": "Tema",
       "telemetry": "Abilita telemetria",
-      "startWithSystem": "Avvia con il sistema"
+      "startWithSystem": "Avvia con il sistema",
+      "gracePeriod": "Periodo di grazia",
+      "gracePeriodDesc": "Tempo di attesa prima di spostare un file dopo l'ultima modifica. 0 = istantaneo.",
+      "checkFileLock": "Verifica blocco file",
+      "checkFileLockDesc": "Salta i file attualmente in uso da un altro processo"
+    },
+    "ignore": {
+      "title": "Ignora",
+      "rulesTitle": "Regole di esclusione",
+      "description": "Scegli una cartella osservata e imposta i pattern per i file che Mouzi dovrebbe saltare. I pattern vengono salvati come file .mouziignore in quella cartella.",
+      "folder": "Cartella",
+      "selectFolder": "Seleziona una cartella...",
+      "patterns": "Pattern",
+      "noRules": "Nessuna regola di esclusione. Aggiungine una qui sotto.",
+      "placeholder": "es. *.tmp o node_modules/",
+      "add": "Aggiungi",
+      "tips": "Suggerimenti:",
+      "save": "Salva .mouziignore",
+      "saved": "Salvato!"
+    },
+    "about": {
+      "tagline": "I tuoi download, domati.",
+      "description": "Mouzi è un organizzatore di file silenzioso ed elegante che vive nella tua barra delle applicazioni e tiene in ordine automaticamente la cartella Download (e qualsiasi altra cartella). Funziona silenziosamente in background, monitora le cartelle selezionate e sposta, rinomina o ordina i file in base a regole personalizzabili.",
+      "checkUpdates": "Controlla aggiornamenti",
+      "support": "Supporta Mouzi su Ko-fi",
+      "supportDesc": "Il tuo supporto aiuta a migliorare Mouzi. Grazie! 🙏"
     }
   },
   "notifications": {
     "cleaned": "Organizzati {{count}} file"
+  },
+  "common": {
+    "cancel": "Annulla",
+    "off": "OFF"
   }
 }
