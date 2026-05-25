@@ -71,7 +71,8 @@
       "add": "Add",
       "tips": "Tips:",
       "save": "Save .mouziignore",
-      "saved": "Saved!"
+      "saved": "Saved!",
+      "remove": "Remove"
     },
     "about": {
       "tagline": "Your downloads, tamed.",

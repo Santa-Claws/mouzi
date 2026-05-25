@@ -93,7 +93,7 @@ export default function Popup() {
     setScanResults(allResults);
     if (allResults.length > 0) {
       await invoke("show_notification", {
-        title: "Mouzi",
+        title: t("app.name"),
         body: t("notifications.cleaned", { count: allResults.length }),
       });
     }

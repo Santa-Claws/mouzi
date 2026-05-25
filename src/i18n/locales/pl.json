@@ -14,8 +14,8 @@
     "undo": "Cofnij",
     "settings": "Ustawienia",
     "quit": "Zamknij",
-    "organized": "Organized: {{file}}",
-    "openFolder": "Click to open → {{folder}}"
+    "organized": "Uporządkowano: {{file}}",
+    "openFolder": "Kliknij, aby otworzyć → {{folder}}"
   },
   "settings": {
     "title": "Ustawienia Mouzi",
@@ -26,7 +26,7 @@
       "mode": "Tryb",
       "silent": "Cichy",
       "suggest": "Podpowiadacz",
-      "placeholder": "C:/Users/.../Downloads"
+      "placeholder": "C:/Użytkownicy/.../Pobrane"
     },
     "rules": {
       "title": "Reguły",
@@ -47,7 +47,7 @@
       "undo": "Cofnij",
       "undone": "Cofnięto",
       "empty": "Brak historii",
-      "revertAll": "Revert All"
+      "revertAll": "Cofnij wszystko"
     },
     "general": {
       "title": "Ogólne",
@@ -55,38 +55,39 @@
       "theme": "Motyw",
       "telemetry": "Włącz telemetrię",
       "startWithSystem": "Uruchamiaj z systemem",
-      "gracePeriod": "Grace period",
-      "gracePeriodDesc": "Wait time before moving a file after it was last modified. 0 = instant.",
-      "checkFileLock": "Check file lock",
-      "checkFileLockDesc": "Skip files currently in use by another process"
+      "gracePeriod": "Okres karencji",
+      "gracePeriodDesc": "Czas oczekiwania przed przeniesieniem pliku po ostatniej modyfikacji. 0 = natychmiast.",
+      "checkFileLock": "Sprawdź blokadę pliku",
+      "checkFileLockDesc": "Pomiń pliki aktualnie używane przez inny proces"
     },
     "ignore": {
-      "title": "Ignore",
-      "rulesTitle": "Ignore Rules",
-      "description": "Choose a watched folder and set patterns for files Mouzi should skip. Patterns are saved as a .mouziignore file in that folder.",
+      "title": "Ignoruj",
+      "rulesTitle": "Reguły ignorowania",
+      "description": "Wybierz monitorowany folder i ustaw wzorce dla plików, które Mouzi powinien pominąć. Wzorce są zapisywane jako plik .mouziignore w tym folderze.",
       "folder": "Folder",
-      "selectFolder": "Select a folder...",
-      "patterns": "Patterns",
-      "noRules": "No ignore rules yet. Add one below.",
-      "placeholder": "e.g. *.tmp or node_modules/",
-      "add": "Add",
-      "tips": "Tips:",
-      "save": "Save .mouziignore",
-      "saved": "Saved!"
+      "selectFolder": "Wybierz folder...",
+      "patterns": "Wzorce",
+      "noRules": "Brak reguł ignorowania. Dodaj jedną poniżej.",
+      "placeholder": "np. *.tmp lub node_modules/",
+      "add": "Dodaj",
+      "tips": "Wskazówki:",
+      "save": "Zapisz .mouziignore",
+      "saved": "Zapisano!",
+      "remove": "Usuń"
     },
     "about": {
-      "tagline": "Your downloads, tamed.",
-      "description": "Mouzi is a silent, elegant file organizer that lives in your system tray and keeps your Downloads folder (and any other folder) automatically tidy. It runs quietly in the background, monitors selected folders, and moves, renames, or sorts files based on customizable rules.",
-      "checkUpdates": "Check for Updates",
-      "support": "Support Mouzi on Ko-fi",
-      "supportDesc": "Your support keeps Mouzi improving. Thank you! 🙏"
+      "tagline": "Twoje pobrane, pod kontrolą.",
+      "description": "Mouzi to cichy, elegancki organizer plików, który mieszka w zasobniku systemowym i automatycznie utrzymuje porządek w folderze Pobrane (i dowolnym innym folderze). Działa cicho w tle, monitoruje wybrane foldery i przenosi, zmienia nazwy lub sortuje pliki na podstawie konfigurowalnych reguł.",
+      "checkUpdates": "Sprawdź aktualizacje",
+      "support": "Wesprzyj Mouzi na Ko-fi",
+      "supportDesc": "Twoje wsparcie pomaga ulepszać Mouzi. Dziękuję! 🙏"
     }
   },
   "notifications": {
     "cleaned": "Uporządkowano {{count}} plik(i)"
   },
   "common": {
-    "cancel": "Cancel",
-    "off": "OFF"
+    "cancel": "Anuluj",
+    "off": "WYŁ."
   }
 }

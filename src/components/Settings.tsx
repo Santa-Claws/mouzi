@@ -487,7 +487,7 @@ export default function Settings() {
             <div className="flex items-center gap-3">
               <img
                 src="/mouzilogo.png"
-                alt="Mouzi"
+                alt={t("app.name")}
                 className="h-12 w-12 rounded-xl"
               />
               <div>
@@ -644,7 +644,7 @@ function IgnoreTab() {
                 <button
                   onClick={() => handleRemove(i)}
                   className="text-text-muted hover:text-red-400 transition-colors"
-                  title="Remove"
+                  title={t("settings.ignore.remove")}
                 >
                   <X size={14} />
                 </button>
