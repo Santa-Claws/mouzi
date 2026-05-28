@@ -36,7 +36,7 @@
       "name": "Name",
       "extensions": "Erweiterungen",
       "destination": "Ziel",
-      "pattern": "Muster",
+      "pattern": "Pattern",
       "priority": "Priorität",
       "action": "Aktion",
       "enabled": "Aktiviert"

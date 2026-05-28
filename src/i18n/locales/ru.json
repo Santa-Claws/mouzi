@@ -36,7 +36,7 @@
       "name": "Название",
       "extensions": "Расширения",
       "destination": "Папка назначения",
-      "pattern": "Шаблон",
+      "pattern": "Pattern",
       "priority": "Приоритет",
       "action": "Действие",
       "enabled": "Включено"

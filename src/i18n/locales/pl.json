@@ -36,7 +36,7 @@
       "name": "Nazwa",
       "extensions": "Rozszerzenia",
       "destination": "Cel",
-      "pattern": "Wzorzec",
+      "pattern": "Wzorzec (regex)",
       "priority": "Priorytet",
       "action": "Akcja",
       "enabled": "Włączona"

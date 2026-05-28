@@ -213,6 +213,21 @@ export default function Settings() {
                           extensions: e.target.value.split(",").map((s) => s.trim()),
                         })
                       }
+                      placeholder={t("settings.rules.extensions")}
+                      className="mt-1 w-full rounded-md border border-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-text-muted">{t("settings.rules.pattern")}</label>
+                    <input
+                      value={editingRule.pattern || ""}
+                      onChange={(e) =>
+                        setEditingRule({
+                          ...editingRule,
+                          pattern: e.target.value.trim() === "" ? null : e.target.value,
+                        })
+                      }
+                      placeholder="(?i)report.*\.pdf"
                       className="mt-1 w-full rounded-md border border-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-primary"
                     />
                   </div>
