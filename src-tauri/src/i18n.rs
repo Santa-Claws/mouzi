@@ -53,6 +53,15 @@ impl TrayI18n {
                 strings.insert("settings_title", "Настройки Mouzi");
                 strings.insert("organized", "Организовано {} файл(ов)");
             }
+            "ja" => {
+                strings.insert("quit", "終了");
+                strings.insert("settings", "設定");
+                strings.insert("clean_now", "今すぐ整理");
+                strings.insert("tooltip", "Mouzi");
+                strings.insert("popup_title", "Mouzi");
+                strings.insert("settings_title", "Mouziの設定");
+                strings.insert("organized", "{}個のファイルを整理しました");
+            }
             _ => {
                 strings.insert("quit", "Quit");
                 strings.insert("settings", "Settings");

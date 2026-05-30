@@ -398,6 +398,7 @@ export default function Settings() {
                   <option value="de">Deutsch</option>
                   <option value="fr">Français</option>
                   <option value="ru">Русский</option>
+                  <option value="ja">日本語</option>
                 </select>
               </div>
               <div>

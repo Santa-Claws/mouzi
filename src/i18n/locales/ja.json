@@ -1,0 +1,92 @@
+{
+  "app": {
+    "name": "Mouzi",
+    "tagline": "ダウンロードして、あとは忘れよう – Mouziが覚えています",
+    "loading": "Mouzi..."
+  },
+  "popup": {
+    "title": "Mouzi",
+    "cleanNow": "今すぐ整理",
+    "openDownloads": "ダウンロードフォルダを開く",
+    "recentActions": "最近のアクション",
+    "noActions": "まだアクションがありません",
+    "weeklyStats": "今週",
+    "undo": "元に戻す",
+    "settings": "設定",
+    "quit": "終了",
+    "organized": "整理済み: {{file}}",
+    "openFolder": "クリックして開く → {{folder}}"
+  },
+  "settings": {
+    "title": "Mouziの設定",
+    "folders": {
+      "title": "監視対象フォルダ",
+      "add": "フォルダを追加",
+      "remove": "削除",
+      "mode": "モード",
+      "silent": "サイレント",
+      "suggest": "提案"
+    },
+    "rules": {
+      "title": "ルール",
+      "add": "ルールを追加",
+      "edit": "編集",
+      "delete": "削除",
+      "name": "名前",
+      "extensions": "拡張子",
+      "destination": "移動先",
+      "pattern": "パターン",
+      "priority": "優先順位",
+      "action": "アクション",
+      "enabled": "有効"
+    },
+    "history": {
+      "title": "履歴",
+      "clear": "履歴を削除",
+      "undo": "取り消す",
+      "undone": "取り消し済み",
+      "empty": "履歴がありません",
+      "revertAll": "すべて取り消す"
+    },
+    "general": {
+      "title": "一般",
+      "language": "言語",
+      "theme": "テーマ",
+      "telemetry": "テレメトリを有効化",
+      "startWithSystem": "システムと同時に起動",
+      "gracePeriod": "猶予時間",
+      "gracePeriodDesc": "ファイルが最後に変更されてから移動するまでの待機時間。0にするとすぐに移動します。",
+      "checkFileLock": "ファイルロックの確認",
+      "checkFileLockDesc": "他のプロセスで使用中のファイルをスキップ"
+    },
+    "ignore": {
+      "title": "除外",
+      "rulesTitle": "除外ルール",
+      "description": "監視対象フォルダを選択して、Mouziがスキップするファイルのパターンを設定します。パターンは .mouziignoreファイルとしてフォルダ内に保存されます。",
+      "folder": "フォルダ",
+      "selectFolder": "フォルダを選択...",
+      "patterns": "パターン",
+      "noRules": "まだルールはありません。以下に追加してください。",
+      "placeholder": "例: *.tmp や node_modules/",
+      "add": "追加",
+      "tips": "ヒント:",
+      "save": ".mouziignoreを保存",
+      "saved": "保存しました!",
+      "remove": "削除"
+    },
+    "about": {
+      "tagline": "ダウンロードを、思い通りに。",
+      "description": "Mouziは、システムトレイに常駐する静かで洗練されたファイルオーガナイザーで、ダウンロードフォルダ(およびその他のフォルダ)を自動で整理します。バックグラウンドで静かに動作し、カスタマイズ可能なルールに基づきファイルを移動、名前の変更、または並べ替えます。",
+      "checkUpdates": "アップデートを確認",
+      "support": "Ko-fiでMouziを支援する",
+      "supportDesc": "皆様のご支援により、Mouziは日々進化し続けています。支援していただき、ありがとうございます！ 🙏"
+    }
+  },
+  "notifications": {
+    "cleaned": "{{count}}個のファイルを整理しました"
+  },
+  "common": {
+    "cancel": "キャンセル",
+    "off": "OFF"
+  }
+}
