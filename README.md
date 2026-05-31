@@ -58,6 +58,7 @@ Auto-detects your Windows system language. Supported:
 - 🇩🇪 German
 - 🇫🇷 French
 - 🇷🇺 Russian
+- 🇯🇵 Japanese
 
 *(Falls back to English if system language is not supported)*
 
