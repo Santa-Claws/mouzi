@@ -25,7 +25,8 @@
       "remove": "削除",
       "mode": "モード",
       "silent": "サイレント",
-      "suggest": "提案"
+      "suggest": "提案",
+      "placeholder": "C:/Users/.../Downloads"
     },
     "rules": {
       "title": "ルール",

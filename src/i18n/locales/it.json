@@ -25,7 +25,8 @@
       "remove": "Rimuovi",
       "mode": "Modalità",
       "silent": "Silenzioso",
-      "suggest": "Suggerisci"
+      "suggest": "Suggerisci",
+      "placeholder": "C:/Users/.../Downloads"
     },
     "rules": {
       "title": "Regole",
