@@ -53,6 +53,9 @@
       "title": "一般",
       "language": "言語",
       "theme": "テーマ",
+      "themeSystem": "システム",
+      "themeLight": "ライト",
+      "themeDark": "ダーク",
       "telemetry": "テレメトリを有効化",
       "startWithSystem": "システムと同時に起動",
       "gracePeriod": "猶予時間",
@@ -80,7 +83,8 @@
       "description": "Mouziは、システムトレイに常駐する静かで洗練されたファイルオーガナイザーで、ダウンロードフォルダ(およびその他のフォルダ)を自動で整理します。バックグラウンドで静かに動作し、カスタマイズ可能なルールに基づきファイルを移動、名前の変更、または並べ替えます。",
       "checkUpdates": "アップデートを確認",
       "support": "Ko-fiでMouziを支援する",
-      "supportDesc": "皆様のご支援により、Mouziは日々進化し続けています。支援していただき、ありがとうございます！ 🙏"
+      "supportDesc": "皆様のご支援により、Mouziは日々進化し続けています。支援していただき、ありがとうございます！ 🙏",
+      "builtBy": "hsrが心を込めて作りました"
     }
   },
   "notifications": {

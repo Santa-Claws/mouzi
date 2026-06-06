@@ -412,9 +412,9 @@ export default function Settings() {
                   }
                   className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
                 >
-                  <option value="system">System</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
+                  <option value="system">{t("settings.general.themeSystem")}</option>
+                  <option value="light">{t("settings.general.themeLight")}</option>
+                  <option value="dark">{t("settings.general.themeDark")}</option>
                 </select>
               </div>
               <div className="flex items-center justify-between">
@@ -541,7 +541,7 @@ export default function Settings() {
                 <ExternalLink size={16} />
                 github.com/hsr88
               </button>
-              <p className="text-xs text-text-muted mt-1">Built with care by hsr</p>
+              <p className="text-xs text-text-muted mt-1">{t("settings.about.builtBy")}</p>
             </div>
 
             {/* Ko-fi - big & bold */}

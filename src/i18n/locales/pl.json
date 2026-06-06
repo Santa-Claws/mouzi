@@ -53,6 +53,9 @@
       "title": "Ogólne",
       "language": "Język",
       "theme": "Motyw",
+      "themeSystem": "Systemowy",
+      "themeLight": "Jasny",
+      "themeDark": "Ciemny",
       "telemetry": "Włącz telemetrię",
       "startWithSystem": "Uruchamiaj z systemem",
       "gracePeriod": "Okres karencji",
@@ -80,7 +83,8 @@
       "description": "Mouzi to cichy, elegancki organizer plików, który mieszka w zasobniku systemowym i automatycznie utrzymuje porządek w folderze Pobrane (i dowolnym innym folderze). Działa cicho w tle, monitoruje wybrane foldery i przenosi, zmienia nazwy lub sortuje pliki na podstawie konfigurowalnych reguł.",
       "checkUpdates": "Sprawdź aktualizacje",
       "support": "Wesprzyj Mouzi na Ko-fi",
-      "supportDesc": "Twoje wsparcie pomaga ulepszać Mouzi. Dziękuję! 🙏"
+      "supportDesc": "Twoje wsparcie pomaga ulepszać Mouzi. Dziękuję! 🙏",
+      "builtBy": "Stworzone z pasją przez hsr"
     }
   },
   "notifications": {

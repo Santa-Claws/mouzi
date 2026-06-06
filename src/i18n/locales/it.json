@@ -53,6 +53,9 @@
       "title": "Generale",
       "language": "Lingua",
       "theme": "Tema",
+      "themeSystem": "Sistema",
+      "themeLight": "Chiaro",
+      "themeDark": "Scuro",
       "telemetry": "Abilita telemetria",
       "startWithSystem": "Avvia con il sistema",
       "gracePeriod": "Periodo di grazia",
@@ -80,7 +83,8 @@
       "description": "Mouzi è un organizzatore di file silenzioso ed elegante che vive nella tua barra delle applicazioni e tiene in ordine automaticamente la cartella Download (e qualsiasi altra cartella). Funziona silenziosamente in background, monitora le cartelle selezionate e sposta, rinomina o ordina i file in base a regole personalizzabili.",
       "checkUpdates": "Controlla aggiornamenti",
       "support": "Supporta Mouzi su Ko-fi",
-      "supportDesc": "Il tuo supporto aiuta a migliorare Mouzi. Grazie! 🙏"
+      "supportDesc": "Il tuo supporto aiuta a migliorare Mouzi. Grazie! 🙏",
+      "builtBy": "Realizzato con cura da hsr"
     }
   },
   "notifications": {
