@@ -116,7 +116,7 @@
         <li><a href="/about/">About</a></li>
         <li><a href="/#features">Features</a></li>
         <li><a href="/#faq">FAQ</a></li>
-        <li><a href="https://github.com/hsr88/mouzi" target="_blank" rel="noopener" class="nav-github"><span id="gh-stars">★ GitHub</span></a></li>
+        <li><a href="https://github.com/hsr88/mouzi" target="_blank" rel="noopener" class="nav-github"><span id="gh-stars">GitHub: ★</span></a></li>
         <li id="kofi-nav" style="display:flex;align-items:center;"></li>
       </ul>
       <a href="/#download" class="nav-cta">Download</a>
@@ -218,7 +218,7 @@ fetch('https://api.github.com/repos/hsr88/mouzi')
   .then(function(data){
     var el = document.getElementById('gh-stars');
     if (el && typeof data.stargazers_count === 'number') {
-      el.textContent = '★ ' + data.stargazers_count.toLocaleString();
+      el.textContent = 'GitHub: ★ ' + data.stargazers_count.toLocaleString();
     }
   })
   .catch(function(){});
