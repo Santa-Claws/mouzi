@@ -1177,109 +1177,6 @@
     }
 
     /* ================================================================
-       CAROUSEL
-       ================================================================ */
-    .carousel {
-      position: relative;
-      max-width: 900px;
-      margin: 0 auto;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    .carousel-track {
-      display: flex;
-      transition: transform 0.6s var(--ease-out-expo);
-    }
-
-    .carousel-slide {
-      min-width: 100%;
-      opacity: 0.4;
-      transition: opacity 0.6s var(--ease-out-expo);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-elevated);
-    }
-
-    .carousel-slide.active {
-      opacity: 1;
-    }
-
-    .carousel-slide img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
-      max-height: 600px;
-    }
-
-    .carousel-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(10, 10, 8, 0.6);
-      backdrop-filter: blur(8px);
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      font-size: 1.4rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s var(--ease-out-expo);
-      z-index: 2;
-      font-family: var(--font-body);
-      line-height: 1;
-      padding-bottom: 4px;
-    }
-
-    .carousel-btn:hover {
-      background: rgba(198, 179, 162, 0.15);
-      border-color: var(--border-hover);
-    }
-
-    .carousel-prev { left: 1rem; }
-    .carousel-next { right: 1rem; }
-
-    .carousel-dots {
-      position: absolute;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 0.5rem;
-      z-index: 2;
-    }
-
-    .carousel-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-      padding: 0;
-    }
-
-    .carousel-dot.active {
-      background: var(--primary);
-      width: 24px;
-      border-radius: 4px;
-    }
-
-    @media (max-width: 768px) {
-      .carousel-slide img { max-height: 50vh; }
-      .carousel-btn { width: 36px; height: 36px; font-size: 1.1rem; }
-    }
-
-    /* ================================================================
        REDUCED MOTION
        ================================================================ */
     @media (prefers-reduced-motion: reduce) {
@@ -1583,17 +1480,10 @@
         <h2 class="section-title">See it in action.</h2>
         <p>Clean up your messy <i>Downloads</i> folder with one click!</p>
       </div>
-      <div class="carousel reveal" data-carousel>
-        <div class="carousel-track">
-          <div class="carousel-slide active"><img src="./screenshots/screenshot1.png" alt="Mouzi Settings - General" loading="lazy"></div>
-          <div class="carousel-slide"><img src="./screenshots/screenshot2.png" alt="Mouzi Settings - Rules" loading="lazy"></div>
-          <div class="carousel-slide"><img src="./screenshots/screenshot3.png" alt="Mouzi Settings - Ignore Rules" loading="lazy"></div>
-          <div class="carousel-slide"><img src="./screenshots/screenshot4.png" alt="Mouzi on Linux" loading="lazy"></div>
-          <div class="carousel-slide"><img src="./screenshots/screenshot5.png" alt="Mouzi on Linux - Settings" loading="lazy"></div>
-        </div>
-        <button class="carousel-btn carousel-prev" aria-label="Previous slide">&#8249;</button>
-        <button class="carousel-btn carousel-next" aria-label="Next slide">&#8250;</button>
-        <div class="carousel-dots"></div>
+      <div class="demo-video-wrap reveal">
+        <video class="demo-video" autoplay muted loop playsinline preload="metadata">
+          <source src="./mozui_action.mp4" type="video/mp4">
+        </video>
       </div>
     </div>
   </section>
@@ -1800,66 +1690,6 @@
       });
     });
 
-    /* ================================================================
-       CAROUSEL
-       ================================================================ */
-    (function() {
-      const carousel = document.querySelector('[data-carousel]');
-      if (!carousel) return;
-      const track = carousel.querySelector('.carousel-track');
-      const slides = carousel.querySelectorAll('.carousel-slide');
-      const prevBtn = carousel.querySelector('.carousel-prev');
-      const nextBtn = carousel.querySelector('.carousel-next');
-      const dotsContainer = carousel.querySelector('.carousel-dots');
-      let current = 0;
-      let autoplay;
-
-      function createDots() {
-        slides.forEach((_, i) => {
-          const dot = document.createElement('button');
-          dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-          dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
-          dot.addEventListener('click', () => goTo(i));
-          dotsContainer.appendChild(dot);
-        });
-      }
-
-      function update() {
-        track.style.transform = 'translateX(-' + (current * 100) + '%)';
-        slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
-        dotsContainer.querySelectorAll('.carousel-dot').forEach((dot, i) => dot.classList.toggle('active', i === current));
-      }
-
-      function goTo(index) {
-        current = (index + slides.length) % slides.length;
-        update();
-        resetAutoplay();
-      }
-
-      function next() { goTo(current + 1); }
-      function prev() { goTo(current - 1); }
-
-      function resetAutoplay() {
-        clearInterval(autoplay);
-        autoplay = setInterval(next, 5000);
-      }
-
-      prevBtn.addEventListener('click', prev);
-      nextBtn.addEventListener('click', next);
-
-      carousel.addEventListener('mouseenter', () => clearInterval(autoplay));
-      carousel.addEventListener('mouseleave', resetAutoplay);
-
-      let touchStartX = 0;
-      carousel.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-      carousel.addEventListener('touchend', e => {
-        const diff = touchStartX - e.changedTouches[0].screenX;
-        if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
-      }, { passive: true });
-
-      createDots();
-      resetAutoplay();
-    })();
   </script>
 
   <div class="cookie-banner" id="cookie-banner">
