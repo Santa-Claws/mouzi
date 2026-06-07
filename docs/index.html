@@ -1177,6 +1177,103 @@
     }
 
     /* ================================================================
+       SCREENSHOT CAROUSEL
+       ================================================================ */
+    .screenshot-carousel {
+      position: relative;
+      max-width: 800px;
+      margin: 1.5rem auto 0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .screenshot-carousel .sc-track {
+      display: flex;
+      transition: transform 0.5s var(--ease-out-expo);
+    }
+
+    .screenshot-carousel .sc-slide {
+      min-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-elevated);
+    }
+
+    .screenshot-carousel .sc-slide img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      max-height: 420px;
+    }
+
+    .screenshot-carousel .sc-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(10, 10, 8, 0.55);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s var(--ease-out-expo);
+      z-index: 2;
+      font-family: var(--font-body);
+      line-height: 1;
+      padding-bottom: 3px;
+    }
+
+    .screenshot-carousel .sc-btn:hover {
+      background: rgba(198, 179, 162, 0.2);
+      border-color: var(--border-hover);
+    }
+
+    .screenshot-carousel .sc-prev { left: 0.75rem; }
+    .screenshot-carousel .sc-next { right: 0.75rem; }
+
+    .screenshot-carousel .sc-dots {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.4rem;
+      z-index: 2;
+    }
+
+    .screenshot-carousel .sc-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      padding: 0;
+    }
+
+    .screenshot-carousel .sc-dot.active {
+      background: var(--primary);
+      width: 20px;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .screenshot-carousel .sc-slide img { max-height: 35vh; }
+      .screenshot-carousel .sc-btn { width: 32px; height: 32px; font-size: 1rem; }
+    }
+
+    /* ================================================================
        REDUCED MOTION
        ================================================================ */
     @media (prefers-reduced-motion: reduce) {
@@ -1485,6 +1582,17 @@
           <source src="./mozui_action.mp4" type="video/mp4">
         </video>
       </div>
+      <div class="screenshot-carousel reveal delay-2" data-sc>
+        <div class="sc-track">
+          <div class="sc-slide"><img src="./screenshots/kar1.png" alt="Mouzi screenshot 1" loading="lazy"></div>
+          <div class="sc-slide"><img src="./screenshots/kar2.png" alt="Mouzi screenshot 2" loading="lazy"></div>
+          <div class="sc-slide"><img src="./screenshots/kar3.png" alt="Mouzi screenshot 3" loading="lazy"></div>
+          <div class="sc-slide"><img src="./screenshots/kar4.png" alt="Mouzi screenshot 4" loading="lazy"></div>
+        </div>
+        <button class="sc-btn sc-prev" aria-label="Previous screenshot">&#8249;</button>
+        <button class="sc-btn sc-next" aria-label="Next screenshot">&#8250;</button>
+        <div class="sc-dots"></div>
+      </div>
     </div>
   </section>
 
@@ -1689,6 +1797,48 @@
         }
       });
     });
+
+    /* ================================================================
+       SCREENSHOT CAROUSEL
+       ================================================================ */
+    (function() {
+      const car = document.querySelector('[data-sc]');
+      if (!car) return;
+      const track = car.querySelector('.sc-track');
+      const slides = car.querySelectorAll('.sc-slide');
+      const prev = car.querySelector('.sc-prev');
+      const next = car.querySelector('.sc-next');
+      const dotsBox = car.querySelector('.sc-dots');
+      let idx = 0;
+
+      slides.forEach((_, i) => {
+        const d = document.createElement('button');
+        d.className = 'sc-dot' + (i === 0 ? ' active' : '');
+        d.setAttribute('aria-label', 'Screenshot ' + (i + 1));
+        d.addEventListener('click', () => go(i));
+        dotsBox.appendChild(d);
+      });
+
+      function upd() {
+        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+        dotsBox.querySelectorAll('.sc-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+
+      function go(i) {
+        idx = (i + slides.length) % slides.length;
+        upd();
+      }
+
+      prev.addEventListener('click', () => go(idx - 1));
+      next.addEventListener('click', () => go(idx + 1));
+
+      let ts = 0;
+      car.addEventListener('touchstart', e => { ts = e.changedTouches[0].screenX; }, { passive: true });
+      car.addEventListener('touchend', e => {
+        const diff = ts - e.changedTouches[0].screenX;
+        if (Math.abs(diff) > 40) diff > 0 ? go(idx + 1) : go(idx - 1);
+      }, { passive: true });
+    })();
 
   </script>
 
