@@ -16,7 +16,11 @@ Mouzi is a silent, elegant file organizer that lives in your system tray and kee
 
 ## 📸 Screenshots
 <img width="640" height="257" alt="ezgif-39399e26ded336f6" src="https://github.com/user-attachments/assets/950b065d-ed29-4e55-9dd2-eaac188fba5d" />
-<img width="490" height="372" alt="Zrzut ekranu 2026-05-09 184947" src="https://github.com/user-attachments/assets/c969b726-69fc-41da-9d2c-55051a107274" />
+<img width="500" height="361" alt="resized-1 (1)" src="https://github.com/user-attachments/assets/cd3d8f4e-1428-420c-bec4-2ce29ca4545a" />
+<img width="500" height="361" alt="resized-1_1780830366" src="https://github.com/user-attachments/assets/84d82ad9-1eaa-44d7-8ddb-f8f3d375a495" />
+
+
+
 
 
 ---
