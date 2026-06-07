@@ -19,7 +19,8 @@ Mouzi is a silent, elegant file organizer that lives in your system tray and kee
 <img width="640" height="257" alt="ezgif-39399e26ded336f6" src="https://github.com/user-attachments/assets/950b065d-ed29-4e55-9dd2-eaac188fba5d" />
 <img width="500" height="361" alt="resized-1 (1)" src="https://github.com/user-attachments/assets/cd3d8f4e-1428-420c-bec4-2ce29ca4545a" />
 <img width="500" height="361" alt="resized-1_1780830366" src="https://github.com/user-attachments/assets/84d82ad9-1eaa-44d7-8ddb-f8f3d375a495" />
-
+<img width="500" height="314" alt="resized-mouzilinux" src="https://github.com/user-attachments/assets/2ed8b18f-4833-40f2-ab19-9d0a63014f88" />
+<img width="500" height="315" alt="resized-mozuilinux2" src="https://github.com/user-attachments/assets/fb6bca80-0b5e-4622-8efc-3ceca186a829" />
 
 
 
