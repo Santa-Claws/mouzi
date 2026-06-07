@@ -182,7 +182,13 @@ pub fn open_folder_cmd(path: String) -> Result<(), String> {
 pub fn get_downloads_folder() -> String {
     directories::UserDirs::new()
         .and_then(|d| d.download_dir().map(|p| p.to_string_lossy().to_string()))
-        .unwrap_or_else(|| "C:/Users".to_string())
+        .unwrap_or_else(|| {
+            if cfg!(target_os = "windows") {
+                "C:/Users".to_string()
+            } else {
+                std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string())
+            }
+        })
 }
 
 #[tauri::command]
