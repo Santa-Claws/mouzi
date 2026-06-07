@@ -14,7 +14,7 @@
   <meta name="saashub-verification" content="u33msmi9bwzm" />
   <link rel="canonical" href="https://mouzi.cc">
 
-  <meta property="og:title" content="Mouzi - Intelligent File Organizer for Windows">
+  <meta property="og:title" content="Mouzi - Intelligent File Organizer for Windows & Linux">
   <meta property="og:description" content="Your downloads, tamed. Silent, automatic, and entirely offline.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://mouzi.cc">
@@ -22,7 +22,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Mouzi - Intelligent File Organizer">
   <meta name="twitter:description"
-    content="Silent, automatic file organizer for Windows. Lives in your tray. 100% offline.">
+    content="Silent, automatic file organizer for Windows & Linux. Lives in your tray. 100% offline.">
 
   <link rel="icon" type="image/png" href="./mouzilogo.png">
   <link rel="apple-touch-icon" href="./mouzilogo.png">
@@ -40,7 +40,7 @@
     "name": "Mouzi",
     "description": "Mouzi is a free, open-source tool that organizes your downloads folder automatically. Silent, privacy-first, and 100% local. Tidy your messy desktop today.",
     "applicationCategory": "UtilitiesApplication",
-    "operatingSystem": "Windows 10, Windows 11",
+    "operatingSystem": "Windows 10, Windows 11, Linux",
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -1309,7 +1309,7 @@
     <div class="hero-overlay"></div>
     <div class="hero-spotlight"></div>
     <div class="hero-content">
-      <p class="hero-eyebrow">For Windows 10 & 11</p>
+      <p class="hero-eyebrow">For Windows 10, 11 & Linux</p>
       <div class="hero-title-row">
         <img src="./mouzilogo.png" alt="" class="hero-logo" width="66" height="66">
         <h1 class="hero-headline">Organize <em>Downloads</em> folder automatically</h1>
@@ -1319,12 +1319,13 @@
         by type. No
         cloud. No clutter. No effort.</p>
       <div class="hero-actions">
-        <a href="#download" class="btn-primary">Download for Windows</a>
+        <a href="#download" class="btn-primary">Download</a>
         <a href="https://github.com/hsr88/mouzi" target="_blank" rel="noopener" class="btn-text">Star on GitHub <span
             class="arrow">→</span></a>
       </div>
       <div class="hero-badges">
         <span class="badge">Windows 10 / 11</span>
+        <span class="badge">Linux</span>
         <span class="badge">Tauri 2.x</span>
         <span class="badge">MIT License</span>
       </div>
@@ -1399,25 +1400,46 @@
       </div>
       <div class="download-grid">
         <div class="download-option reveal">
-          <span class="download-tag">Recommended</span>
+          <span class="download-tag">Windows · Recommended</span>
           <h3>Auto Installer</h3>
           <p class="download-meta">Mouzi_0.1.1_x64-setup.exe &mdash; ~3.3 MB</p>
           <p class="download-desc">The easiest way to get started. Double-click, install, done.</p>
           <a href="./download/Mouzi_0.1.1_x64-setup.exe" class="btn-primary" download onclick="if(typeof gtag==='function')gtag('event','download',{method:'setup'})">Download .exe</a>
         </div>
         <div class="download-option reveal delay-1">
-          <span class="download-tag">Enterprise</span>
+          <span class="download-tag">Windows · Enterprise</span>
           <h3>MSI Package</h3>
           <p class="download-meta">Mouzi_0.1.1_x64_en-US.msi &mdash; ~4.7 MB</p>
           <p class="download-desc">For IT administrators and managed deployments.</p>
           <a href="./download/Mouzi_0.1.1_x64_en-US.msi" class="btn-secondary" download onclick="if(typeof gtag==='function')gtag('event','download',{method:'msi'})">Download .msi</a>
         </div>
         <div class="download-option reveal delay-2">
-          <span class="download-tag">Power User</span>
+          <span class="download-tag">Windows · Portable</span>
           <h3>Portable</h3>
           <p class="download-meta">Mouzi_0.1.1_x64-portable.exe &mdash; ~14 MB</p>
           <p class="download-desc">No install needed. Just download, run, and delete when done.</p>
           <a href="./download/Mouzi_0.1.1_x64-portable.exe" class="btn-secondary" download onclick="if(typeof gtag==='function')gtag('event','download',{method:'portable'})">Download portable</a>
+        </div>
+        <div class="download-option reveal">
+          <span class="download-tag">Linux · Recommended</span>
+          <h3>AppImage</h3>
+          <p class="download-meta">Mouzi_0.1.0_amd64.AppImage &mdash; ~86 MB</p>
+          <p class="download-desc">Universal Linux package. Works on most distros. No install needed.</p>
+          <a href="./download/linux/Mouzi_0.1.0_amd64.AppImage" class="btn-primary" download onclick="if(typeof gtag==='function')gtag('event','download',{method:'appimage'})">Download AppImage</a>
+        </div>
+        <div class="download-option reveal delay-1">
+          <span class="download-tag">Linux · Debian/Ubuntu</span>
+          <h3>.deb Package</h3>
+          <p class="download-meta">Mouzi_0.1.0_amd64.deb &mdash; ~6.9 MB</p>
+          <p class="download-desc">Native package for Debian, Ubuntu, Mint, and derivatives.</p>
+          <a href="./download/linux/Mouzi_0.1.0_amd64.deb" class="btn-secondary" download onclick="if(typeof gtag==='function')gtag('event','download',{method:'deb'})">Download .deb</a>
+        </div>
+        <div class="download-option reveal delay-2">
+          <span class="download-tag">Linux · Fedora/openSUSE</span>
+          <h3>.rpm Package</h3>
+          <p class="download-meta">Mouzi-0.1.0-1.x86_64.rpm &mdash; ~6.9 MB</p>
+          <p class="download-desc">Native package for Fedora, openSUSE, RHEL, and derivatives.</p>
+          <a href="./download/linux/Mouzi-0.1.0-1.x86_64.rpm" class="btn-secondary" download onclick="if(typeof gtag==='function')gtag('event','download',{method:'rpm'})">Download .rpm</a>
         </div>
         <p class="download-github reveal" style="grid-column: 1 / -1; text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
           Prefer GitHub? <a href="https://github.com/hsr88/mouzi/releases/latest" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline;">Download the latest release directly from GitHub</a>.

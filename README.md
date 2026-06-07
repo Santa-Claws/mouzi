@@ -5,6 +5,7 @@
 Mouzi is a silent, elegant file organizer that lives in your system tray and keeps your Downloads folder (and any other folder) automatically tidy. It runs quietly in the background, monitors selected folders, and moves, renames, or sorts files based on customizable rules.
 
 [![Windows](https://img.shields.io/badge/Windows-10%2F11-blue?logo=windows)](https://mouzi.cc)
+[![Linux](https://img.shields.io/badge/Linux-AppImage%2Fdeb%2Frpm-yellow?logo=linux)](https://mouzi.cc)
 [![Tauri](https://img.shields.io/badge/Built%20with-Tauri-FFC131?logo=tauri)](https://tauri.app)
 [![Rust](https://img.shields.io/badge/Backend-Rust-000000?logo=rust)](https://www.rust-lang.org)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://react.dev)
@@ -57,7 +58,7 @@ Mouzi is a silent, elegant file organizer that lives in your system tray and kee
 - Clear history anytime
 
 ### 🌍 Multi-language
-Auto-detects your Windows system language. Supported:
+Auto-detects your system language. Supported:
 - 🇬🇧 English
 - 🇵🇱 Polish
 - 🇮🇹 Italian
@@ -82,28 +83,42 @@ Auto-detects your Windows system language. Supported:
 
 ## 📥 Download
 
+### Windows
+
 | Installer | Size | Best For |
 |-----------|------|----------|
-| [`Mouzi_0.1.0_x64-setup.exe`](https://mouzi.cc/download) | ~3.3 MB | Regular users (auto-installer) |
-| [`Mouzi_0.1.0_x64_en-US.msi`](https://mouzi.cc/download) | ~4.7 MB | Enterprise / Active Directory |
-| [`Mouzi_0.1.0_x64-portable.exe`](https://mouzi.cc/download) | ~14 MB | Power users (no install) |
+| [`Mouzi_0.1.1_x64-setup.exe`](https://mouzi.cc/download) | ~3.3 MB | Regular users (auto-installer) |
+| [`Mouzi_0.1.1_x64_en-US.msi`](https://mouzi.cc/download) | ~4.7 MB | Enterprise / Active Directory |
+| [`Mouzi_0.1.1_x64-portable.exe`](https://mouzi.cc/download) | ~14 MB | Power users (no install) |
+
+> ⚠️ **Windows 10/11.** Requires the [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on most systems).
+
+### Linux
+
+| Package | Size | Best For |
+|---------|------|----------|
+| [`Mouzi_0.1.0_amd64.AppImage`](https://mouzi.cc/download/linux) | ~86 MB | Universal — works on most distros |
+| [`Mouzi_0.1.0_amd64.deb`](https://mouzi.cc/download/linux) | ~6.9 MB | Debian, Ubuntu, Mint, Pop!_OS |
+| [`Mouzi-0.1.0-1.x86_64.rpm`](https://mouzi.cc/download/linux) | ~6.9 MB | Fedora, openSUSE, RHEL |
+
+> 🐧 **Linux requirements:** `libwebkit2gtk-4.1` and `libayatana-appindicator3`. Most modern distros have these pre-installed.
 
 **SHA-256 Checksums**
 
 ```
-Mouzi_0.1.0_x64-setup.exe: 97e76364811b02e40d6d1443399c93823df3e3f68db2c27d55188b9659605beb
-Mouzi_0.1.0_x64_en-US.msi: 4d140319df71b35c80ae323fb1bc3f5cd3940d4243438d4a132e146fd7780f46
-Mouzi_0.1.0_x64-portable.exe: b3a1f234610275e3248dce8b6deafcd06b7b99f254ff5f5d9a7c1aa4fb8f019b
+Mouzi_0.1.1_x64-setup.exe:   (see release page)
+Mouzi_0.1.0_amd64.AppImage:  (see release page)
+Mouzi_0.1.0_amd64.deb:       (see release page)
+Mouzi-0.1.0-1.x86_64.rpm:    (see release page)
 ```
-
-> ⚠️ **Windows 10/11 only.** Requires the [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on most systems).
 
 ---
 
 ## 🚀 Quick Start
 
-1. **Download & install** Mouzi using the installer above.
-2. Mouzi starts automatically and places an icon in your system tray (📂).
+1. **Download** Mouzi for your OS using the links above.
+2. **Windows:** Install and Mouzi starts automatically with a tray icon (📂).
+   **Linux:** Run the AppImage directly, or install the `.deb`/`.rpm` package.
 3. **Left-click** the tray icon to open the popup - see recent actions, stats, and clean manually.
 4. **Right-click** the tray icon for the menu: `Clean Now`, `Settings`, `Quit`.
 5. Drop a file into your `Downloads` folder and watch it disappear into the right subfolder within 2 seconds.
@@ -151,8 +166,9 @@ Downloads/Documents/{year}/{month}/
 
 ### Prerequisites
 - [Rust](https://rustup.rs/) (latest stable)
-- [Node.js](https://nodejs.org/) 20+
-- Windows SDK / MSVC (Visual Studio Build Tools)
+- [Node.js](https://nodejs.org/) 22+
+- **Windows:** Windows SDK / MSVC (Visual Studio Build Tools)
+- **Linux:** `libwebkit2gtk-4.1-dev`, `libayatana-appindicator3-dev`, `fuse` (see [Tauri Linux prerequisites](https://v2.tauri.app/start/prerequisites/))
 
 ### Setup
 
@@ -205,7 +221,8 @@ Output will be in `src-tauri/target/release/bundle/`.
 - [ ] Suggest mode (modal confirmation per file)
 - [ ] Local AI tagging (ONNX runtime for content classification)
 - [ ] Rule learning from user manual moves
-- [ ] macOS & Linux ports
+- [x] Linux port (AppImage, .deb, .rpm)
+- [ ] macOS port
 
 ---
 
