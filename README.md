@@ -9,8 +9,9 @@ Mouzi is a silent, elegant file organizer that lives in your system tray and kee
 [![Rust](https://img.shields.io/badge/Backend-Rust-000000?logo=rust)](https://www.rust-lang.org)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://react.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Download Mouzi](https://img.shields.io/sourceforge/dt/mozui.svg)](https://sourceforge.net/projects/mozui/files/latest/download)
 [![GitGem](https://gitgem.org/api/badge/github/hsr88/mouzi.svg)](https://gitgem.org/github/hsr88/mouzi)
+
+[![Download Mouzi](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/mozui/files/latest/download)
 ---
 
 ## 📸 Screenshots
