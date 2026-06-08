@@ -211,6 +211,7 @@ Output will be in `src-tauri/target/release/bundle/`.
 - [x] Portable version (single .exe, no installer)
 - [x] Browser temp files ignored (`.crdownload`, `.part`, `.tmp`)
 - [x] Grace period option - delay moving files by X minutes (so browser download links stay valid)
+- [ ] Extend grace period slider to 48h+ with custom manual input (minutes / hours)
 - [x] File lock check - skip files currently in use by another process
 - [x] Single-instance guard - prevent duplicate processes & tray icons
 - [x] First-run popup visibility - show window on initial launch
