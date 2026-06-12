@@ -768,16 +768,42 @@
         <div class="docs-content reveal delay-1">
 
           <h3 id="getting-started">Getting Started</h3>
-          <p><strong>1. Download and install</strong> Mouzi using the auto-installer (<code>.exe</code>) or MSI package
-            from the <a href="/#download" style="color:var(--primary)">homepage</a>.</p>
-          <p><strong>2. Launch Mouzi.</strong> It starts automatically and places an icon in your system tray.</p>
-          <p><strong>3. Left-click</strong> the tray icon to open the popup - see recent actions, weekly stats, and
+          <p><strong>Windows:</strong> Download the auto-installer (<code>.exe</code>) or MSI package from the
+            <a href="/#download" style="color:var(--primary)">homepage</a>, then launch Mouzi. It starts automatically
+            and places an icon in your system tray.</p>
+          <p><strong>Linux:</strong> Download the AppImage, <code>.deb</code>, or <code>.rpm</code> package from the
+            <a href="/#download" style="color:var(--primary)">homepage</a>. See the Linux installation section below for
+            details.</p>
+          <p><strong>1. Launch Mouzi.</strong> On first run, it watches your Downloads folder by default.</p>
+          <p><strong>2. Left-click</strong> the tray icon to open the popup - see recent actions, weekly stats, and
             clean manually.</p>
-          <p><strong>4. Right-click</strong> the tray icon for the menu: <strong>Clean Now</strong>,
+          <p><strong>3. Right-click</strong> the tray icon for the menu: <strong>Clean Now</strong>,
             <strong>Settings</strong>, <strong>Quit</strong>.
           </p>
-          <p><strong>5. Drop a file</strong> into your Downloads folder and watch it disappear into the right subfolder
+          <p><strong>4. Drop a file</strong> into your Downloads folder and watch it disappear into the right subfolder
             within 2 seconds.</p>
+
+          <h3 id="linux-installation">Linux Installation</h3>
+          <p>Mouzi runs on most modern Linux distributions. Make sure these libraries are installed (they come
+            pre-installed on most desktop distros):</p>
+          <ul>
+            <li><code>libwebkit2gtk-4.1</code></li>
+            <li><code>libayatana-appindicator3</code></li>
+          </ul>
+
+          <p><strong>AppImage</strong> (universal, no install needed):</p>
+          <pre><code>chmod +x Mouzi_0.1.0_amd64.AppImage
+./Mouzi_0.1.0_amd64.AppImage</code></pre>
+
+          <p><strong>.deb</strong> (Debian, Ubuntu, Mint, Pop!_OS):</p>
+          <pre><code>sudo dpkg -i Mouzi_0.1.0_amd64.deb
+sudo apt-get install -f</code></pre>
+
+          <p><strong>.rpm</strong> (Fedora, openSUSE, RHEL):</p>
+          <pre><code>sudo dnf install Mouzi-0.1.0-1.x86_64.rpm</code></pre>
+
+          <p>If your distro uses AppArmor or similar sandboxing, you may need to allow Mouzi to access your home
+            directory so it can watch folders and move files.</p>
 
           <h3 id="features">Features</h3>
           <p><strong>Silent by Design</strong> - Runs quietly in the background. No pop-ups, no interruptions - just a
