@@ -60,7 +60,8 @@
       "undo": "取り消す",
       "undone": "取り消し済み",
       "empty": "履歴がありません",
-      "revertAll": "すべて取り消す"
+      "revertAll": "すべて取り消す",
+      "revertAllDisabled": "元に戻すアクションがありません"
     },
     "general": {
       "title": "一般",

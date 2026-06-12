@@ -60,7 +60,8 @@
       "undo": "Undo",
       "undone": "Undone",
       "empty": "No history",
-      "revertAll": "Revert All"
+      "revertAll": "Revert All",
+      "revertAllDisabled": "No actions to revert"
     },
     "general": {
       "title": "General",

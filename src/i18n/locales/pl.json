@@ -60,7 +60,8 @@
       "undo": "Cofnij",
       "undone": "Cofnięto",
       "empty": "Brak historii",
-      "revertAll": "Cofnij wszystko"
+      "revertAll": "Cofnij wszystko",
+      "revertAllDisabled": "Brak akcji do cofnięcia"
     },
     "general": {
       "title": "Ogólne",

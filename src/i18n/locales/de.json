@@ -60,7 +60,8 @@
       "undo": "Rückgängig",
       "undone": "Rückgängig gemacht",
       "empty": "Kein Verlauf",
-      "revertAll": "Revert All"
+      "revertAll": "Revert All",
+      "revertAllDisabled": "Keine Aktionen zum Rückgängigmachen"
     },
     "general": {
       "title": "Allgemein",

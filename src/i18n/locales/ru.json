@@ -60,7 +60,8 @@
       "undo": "Отменить",
       "undone": "Отменено",
       "empty": "История пуста",
-      "revertAll": "Revert All"
+      "revertAll": "Revert All",
+      "revertAllDisabled": "Нет действий для отмены"
     },
     "general": {
       "title": "Общие",

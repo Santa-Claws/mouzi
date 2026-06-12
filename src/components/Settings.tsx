@@ -567,7 +567,9 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={async () => { await undoAll(); }}
-                  className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm text-text hover:bg-surface-dark"
+                  disabled={logs.length === 0 || logs.every((log) => log.undone)}
+                  title={logs.length === 0 || logs.every((log) => log.undone) ? t("settings.history.revertAllDisabled") : undefined}
+                  className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm text-text hover:bg-surface-dark disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <RotateCcw size={14} />
                   {t("settings.history.revertAll")}
