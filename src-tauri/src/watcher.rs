@@ -187,6 +187,57 @@ impl FolderWatcher {
             let ig = ignored.clone();
             let h = handle.clone();
 
+            // Initial scan: process files that already exist in the folder.
+            // This ensures files present before the folder was added are not ignored forever.
+            if let Ok(entries) = std::fs::read_dir(&folder.path) {
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    if path.is_file()
+                        && !should_ignore_file(&path)
+                        && !is_file_ignored_by_mouziignore(&path)
+                    {
+                        let path_str = path.to_string_lossy().to_string();
+                        let mut ignore_guard = ig.lock().unwrap();
+                        if let Some(&instant) = ignore_guard.get(&path_str) {
+                            if Instant::now().duration_since(instant) < Duration::from_secs(IGNORE_DURATION_SECS) {
+                                continue;
+                            }
+                            ignore_guard.remove(&path_str);
+                        }
+                        drop(ignore_guard);
+
+                        if is_manual {
+                            let file_name = path.file_name()
+                                .unwrap_or_default()
+                                .to_string_lossy()
+                                .to_string();
+                            let mut manual = pm.lock().unwrap();
+                            manual.insert(path_str.clone());
+                            drop(manual);
+                            let _ = h.emit("file-detected", serde_json::json!({
+                                "folder": folder_path,
+                                "file": file_name,
+                            }));
+                        } else {
+                            let grace = crate::db::get_settings()
+                                .map(|s| s.grace_period_seconds as u64)
+                                .unwrap_or(300);
+                            let mut guard = p.lock().unwrap();
+                            guard.retain(|x| x.path != path);
+                            guard.push(PendingFile {
+                                path,
+                                scheduled: Instant::now() + Duration::from_secs(grace),
+                            });
+                        }
+                    }
+                }
+            }
+
+            let p = pending.clone();
+            let pm = pending_manual.clone();
+            let ig = ignored.clone();
+            let h = handle.clone();
+
             let mut watcher = RecommendedWatcher::new(
                 move |res: Result<Event, notify::Error>| {
                     if let Ok(event) = res {
@@ -246,7 +297,7 @@ impl FolderWatcher {
                 .watch(Path::new(&folder.path), RecursiveMode::NonRecursive)
                 .map_err(|e| e.to_string())?;
 
-            self.watchers.insert(folder.path, watcher);
+            self.watchers.insert(folder.path.clone(), watcher);
         }
 
         // Only start the processing thread once. refresh() reuses the same thread.
