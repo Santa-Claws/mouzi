@@ -15,7 +15,9 @@
     "settings": "Настройки",
     "quit": "Выход",
     "organized": "Organized: {{file}}",
-    "openFolder": "Click to open → {{folder}}"
+    "openFolder": "Click to open → {{folder}}",
+    "pendingFiles": "{{count}} файлов ожидает",
+    "cleanManual": "Сортировать сейчас"
   },
   "settings": {
     "title": "Настройки Mouzi",
@@ -26,7 +28,11 @@
       "mode": "Режим",
       "silent": "Тихий",
       "suggest": "Предлагать",
-      "placeholder": "C:/Users/.../Downloads"
+      "placeholder": "C:/Users/.../Downloads",
+      "modeSilent": "Тихий (авто)",
+      "modeManual": "Ручной (только сбор)",
+      "modePaused": "Приостановлен",
+      "modeDesc": "Выберите, как Mouzi обрабатывает файлы в этой папке."
     },
     "rules": {
       "title": "Правила",
@@ -39,7 +45,14 @@
       "pattern": "Pattern",
       "priority": "Приоритет",
       "action": "Действие",
-      "enabled": "Включено"
+      "enabled": "Включено",
+      "export": "Экспорт правил",
+      "import": "Импорт правил",
+      "exportSuccess": "Правила экспортированы",
+      "importSuccess": "Импортировано {{count}} правил",
+      "importError": "Не удалось импортировать правила",
+      "exportError": "Не удалось экспортировать правила",
+      "replaceOnImport": "Заменить существующие правила (иначе добавить)"
     },
     "history": {
       "title": "История",
@@ -61,7 +74,12 @@
       "gracePeriod": "Grace period",
       "gracePeriodDesc": "Wait time before moving a file after it was last modified. 0 = instant.",
       "checkFileLock": "Check file lock",
-      "checkFileLockDesc": "Skip files currently in use by another process"
+      "checkFileLockDesc": "Skip files currently in use by another process",
+      "gracePeriodSeconds": "Секунды",
+      "gracePeriodMinutes": "Минуты",
+      "gracePeriodHours": "Часы",
+      "gracePeriodCustom": "Пользовательский",
+      "gracePeriodMaxError": "Период ожидания не может превышать 7 дней"
     },
     "ignore": {
       "title": "Ignore",
@@ -85,6 +103,17 @@
       "support": "Support Mouzi on Ko-fi",
       "supportDesc": "Your support keeps Mouzi improving. Thank you! 🙏",
       "builtBy": "Сделано с заботой — hsr"
+    },
+    "scheduler": {
+      "title": "Планировщик",
+      "enable": "Включить запланированную очистку",
+      "timesPerDay": "Раз в день",
+      "time": "Время {{number}}",
+      "desc": "Автоматически запускайте очистку по расписанию.",
+      "once": "Раз в день",
+      "twice": "Два раза в день",
+      "thrice": "3 раза в день",
+      "fourTimes": "4 раза в день"
     }
   },
   "notifications": {

@@ -83,6 +83,19 @@ pub fn should_ignore_file(path: &Path) -> bool {
     false
 }
 
+/// Check whether a file is ignored by the `.mouziignore` in its parent folder.
+/// This is the single helper used by both the watcher and the manual Clean Now path
+/// so both code paths behave identically.
+pub fn is_file_ignored_by_mouziignore(path: &Path) -> bool {
+    if let Some(parent) = path.parent() {
+        let patterns = load_mouziignore(&parent.to_string_lossy());
+        if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+            return is_ignored(name, &patterns);
+        }
+    }
+    false
+}
+
 pub fn scan_file(path: &Path) -> Option<FileInfo> {
     if should_ignore_file(path) {
         return None;
@@ -195,14 +208,11 @@ pub fn process_file(path: &Path) -> Result<Option<(Rule, String)>, String> {
         return Ok(None);
     }
 
-    if let Some(parent) = path.parent() {
-        let patterns = load_mouziignore(&parent.to_string_lossy());
-        if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-            if is_ignored(name, &patterns) {
-                return Ok(None);
-            }
-        }
+    // Safety net: also check .mouziignore inside process_file.
+    if is_file_ignored_by_mouziignore(path) {
+        return Ok(None);
     }
+
     let file_info = scan_file(path).ok_or("Cannot read file metadata")?;
     let rule = find_matching_rule(&file_info).ok_or("No matching rule")?;
 
@@ -234,7 +244,10 @@ pub fn manual_scan_folder(folder: &str) -> Result<Vec<(String, String, String)>,
     for entry in entries {
         let entry = entry.map_err(|e| e.to_string())?;
         let path = entry.path();
-        if path.is_file() && !should_ignore_file(&path) {
+        if path.is_file()
+            && !should_ignore_file(&path)
+            && !is_file_ignored_by_mouziignore(&path)
+        {
             if let Ok(Some((rule, dest))) = process_file(&path) {
                 results.push((
                     path.file_name().unwrap_or_default().to_string_lossy().to_string(),

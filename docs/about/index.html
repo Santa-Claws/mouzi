@@ -792,15 +792,15 @@
           </ul>
 
           <p><strong>AppImage</strong> (universal, no install needed):</p>
-          <pre><code>chmod +x Mouzi_0.1.0_amd64.AppImage
-./Mouzi_0.1.0_amd64.AppImage</code></pre>
+          <pre><code>chmod +x Mouzi_0.1.2_amd64.AppImage
+./Mouzi_0.1.2_amd64.AppImage</code></pre>
 
           <p><strong>.deb</strong> (Debian, Ubuntu, Mint, Pop!_OS):</p>
-          <pre><code>sudo dpkg -i Mouzi_0.1.0_amd64.deb
+          <pre><code>sudo dpkg -i Mouzi_0.1.2_amd64.deb
 sudo apt-get install -f</code></pre>
 
           <p><strong>.rpm</strong> (Fedora, openSUSE, RHEL):</p>
-          <pre><code>sudo dnf install Mouzi-0.1.0-1.x86_64.rpm</code></pre>
+          <pre><code>sudo dnf install Mouzi-0.1.2-1.x86_64.rpm</code></pre>
 
           <p>If your distro uses AppArmor or similar sandboxing, you may need to allow Mouzi to access your home
             directory so it can watch folders and move files.</p>
@@ -812,12 +812,18 @@ sudo apt-get install -f</code></pre>
             paths like <code>{year}/{month}</code>.</p>
           <p><strong>History & Undo</strong> - Every action is logged locally. Made a mistake? Undo any move with a
             single click. You can also <strong>Revert All</strong> from the History tab.</p>
-          <p><strong>5 Languages</strong> - Auto-detects your system language. English, Polish, Italian, German, and
-            French supported.</p>
+          <p><strong>7 Languages</strong> - Auto-detects your system language. English, Polish, Italian, German,
+            French, Russian, and Japanese supported.</p>
           <p><strong>Dark Mode</strong> - Follows your Windows theme or switch manually between Light, Dark, and System.
           </p>
           <p><strong>Autostart</strong> - Mouzi registers itself to start with Windows automatically. Toggle this in
             Settings → General.</p>
+          <p><strong>Manual &amp; Paused Folder Modes</strong> - Set a folder to collect files without auto-moving, or
+            pause watching entirely.</p>
+          <p><strong>Scheduled Cleaning</strong> - Run Clean Now automatically up to four times per day at fixed times.
+          </p>
+          <p><strong>Extended Grace Period</strong> - Delay file moves from seconds up to 48+ hours.</p>
+          <p><strong>Rule Export / Import</strong> - Back up and share your rules as JSON.</p>
 
           <h3 id="configuration">Configuration</h3>
           <p>Open <strong>Settings</strong> from the tray menu to customize Mouzi.</p>

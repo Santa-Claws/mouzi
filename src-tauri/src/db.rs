@@ -5,6 +5,36 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use once_cell::sync::OnceCell;
 
+// ---------------------------------------------------------------------------
+// Folder modes
+// ---------------------------------------------------------------------------
+
+pub const FOLDER_MODE_SILENT: &str = "silent";
+pub const FOLDER_MODE_MANUAL: &str = "manual";
+pub const FOLDER_MODE_PAUSED: &str = "paused";
+
+pub const FOLDER_MODES: &[&str] = &[FOLDER_MODE_SILENT, FOLDER_MODE_MANUAL, FOLDER_MODE_PAUSED];
+
+pub fn is_folder_auto_mode(mode: &str) -> bool {
+    mode == FOLDER_MODE_SILENT
+}
+
+pub fn is_folder_manual_mode(mode: &str) -> bool {
+    mode == FOLDER_MODE_MANUAL
+}
+
+pub fn is_folder_paused_mode(mode: &str) -> bool {
+    mode == FOLDER_MODE_PAUSED
+}
+
+pub fn is_valid_folder_mode(mode: &str) -> bool {
+    FOLDER_MODES.contains(&mode)
+}
+
+// ---------------------------------------------------------------------------
+// Data structures
+// ---------------------------------------------------------------------------
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Rule {
     pub id: Option<i64>,
@@ -23,7 +53,9 @@ pub struct WatchedFolder {
     pub id: Option<i64>,
     pub path: String,
     pub enabled: bool,
-    pub mode: String, // "silent", "suggest"
+    /// One of: "silent" (real-time auto-organize), "manual" (collect only),
+    /// "paused" (do not watch).
+    pub mode: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -48,6 +80,22 @@ pub struct AppSettings {
     pub autostart: bool,
     pub grace_period_seconds: i64,
     pub lock_check_enabled: bool,
+    pub schedule_enabled: bool,
+    pub schedule_times_per_day: i64,
+    pub schedule_time_1: Option<String>,
+    pub schedule_time_2: Option<String>,
+    pub schedule_time_3: Option<String>,
+    pub schedule_time_4: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScheduleSettings {
+    pub schedule_enabled: bool,
+    pub schedule_times_per_day: i64,
+    pub schedule_time_1: Option<String>,
+    pub schedule_time_2: Option<String>,
+    pub schedule_time_3: Option<String>,
+    pub schedule_time_4: Option<String>,
 }
 
 static DB: OnceCell<Arc<Mutex<Connection>>> = OnceCell::new();
@@ -119,6 +167,24 @@ pub fn init_db(app_dir: PathBuf) -> SqliteResult<()> {
     }
     if !cols.iter().any(|c| c == "lock_check_enabled") {
         conn.execute("ALTER TABLE settings ADD COLUMN lock_check_enabled INTEGER NOT NULL DEFAULT 1", [])?;
+    }
+    if !cols.iter().any(|c| c == "schedule_enabled") {
+        conn.execute("ALTER TABLE settings ADD COLUMN schedule_enabled INTEGER NOT NULL DEFAULT 0", [])?;
+    }
+    if !cols.iter().any(|c| c == "schedule_times_per_day") {
+        conn.execute("ALTER TABLE settings ADD COLUMN schedule_times_per_day INTEGER NOT NULL DEFAULT 1", [])?;
+    }
+    if !cols.iter().any(|c| c == "schedule_time_1") {
+        conn.execute("ALTER TABLE settings ADD COLUMN schedule_time_1 TEXT", [])?;
+    }
+    if !cols.iter().any(|c| c == "schedule_time_2") {
+        conn.execute("ALTER TABLE settings ADD COLUMN schedule_time_2 TEXT", [])?;
+    }
+    if !cols.iter().any(|c| c == "schedule_time_3") {
+        conn.execute("ALTER TABLE settings ADD COLUMN schedule_time_3 TEXT", [])?;
+    }
+    if !cols.iter().any(|c| c == "schedule_time_4") {
+        conn.execute("ALTER TABLE settings ADD COLUMN schedule_time_4 TEXT", [])?;
     }
 
     // Insert default settings if empty
@@ -257,6 +323,13 @@ pub fn delete_rule(id: i64) -> SqliteResult<()> {
     Ok(())
 }
 
+pub fn delete_all_rules() -> SqliteResult<()> {
+    let db = get_db();
+    let conn = db.lock().unwrap();
+    conn.execute("DELETE FROM rules", [])?;
+    Ok(())
+}
+
 pub fn get_watched_folders() -> SqliteResult<Vec<WatchedFolder>> {
     let db = get_db();
     let conn = db.lock().unwrap();
@@ -382,7 +455,7 @@ pub fn get_settings() -> SqliteResult<AppSettings> {
     let db = get_db();
     let conn = db.lock().unwrap();
     conn.query_row(
-        "SELECT id, language, theme, telemetry_enabled, first_run, autostart, grace_period_seconds, lock_check_enabled FROM settings LIMIT 1",
+        "SELECT id, language, theme, telemetry_enabled, first_run, autostart, grace_period_seconds, lock_check_enabled, schedule_enabled, schedule_times_per_day, schedule_time_1, schedule_time_2, schedule_time_3, schedule_time_4 FROM settings LIMIT 1",
         [],
         |row| {
             Ok(AppSettings {
@@ -394,6 +467,12 @@ pub fn get_settings() -> SqliteResult<AppSettings> {
                 autostart: row.get::<_, i32>(5).unwrap_or(1) != 0,
                 grace_period_seconds: row.get::<_, i64>(6).unwrap_or(300),
                 lock_check_enabled: row.get::<_, i32>(7).unwrap_or(1) != 0,
+                schedule_enabled: row.get::<_, i32>(8).unwrap_or(0) != 0,
+                schedule_times_per_day: row.get::<_, i64>(9).unwrap_or(1),
+                schedule_time_1: row.get(10).ok(),
+                schedule_time_2: row.get(11).ok(),
+                schedule_time_3: row.get(12).ok(),
+                schedule_time_4: row.get(13).ok(),
             })
         },
     )
@@ -403,7 +482,7 @@ pub fn update_settings(settings: &AppSettings) -> SqliteResult<()> {
     let db = get_db();
     let conn = db.lock().unwrap();
     conn.execute(
-        "UPDATE settings SET language=?1, theme=?2, telemetry_enabled=?3, first_run=?4, autostart=?5, grace_period_seconds=?6, lock_check_enabled=?7 WHERE id=?8",
+        "UPDATE settings SET language=?1, theme=?2, telemetry_enabled=?3, first_run=?4, autostart=?5, grace_period_seconds=?6, lock_check_enabled=?7, schedule_enabled=?8, schedule_times_per_day=?9, schedule_time_1=?10, schedule_time_2=?11, schedule_time_3=?12, schedule_time_4=?13 WHERE id=?14",
         params![
             settings.language,
             settings.theme,
@@ -412,6 +491,12 @@ pub fn update_settings(settings: &AppSettings) -> SqliteResult<()> {
             settings.autostart as i32,
             settings.grace_period_seconds,
             settings.lock_check_enabled as i32,
+            settings.schedule_enabled as i32,
+            settings.schedule_times_per_day,
+            settings.schedule_time_1,
+            settings.schedule_time_2,
+            settings.schedule_time_3,
+            settings.schedule_time_4,
             settings.id
         ],
     )?;

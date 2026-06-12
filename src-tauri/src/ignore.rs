@@ -32,8 +32,17 @@ pub fn save_mouziignore(folder_path: &str, patterns: &[String]) -> Result<(), St
 
 /// Check if a file name matches any of the ignore patterns.
 /// Supports: literal match, `*` wildcard, and `folder/` directory suffix.
+/// On Windows, matching is case-insensitive for both literals and wildcards.
 pub fn is_ignored(name: &str, patterns: &[String]) -> bool {
-    for pat in patterns {
+    #[cfg(windows)]
+    let name = name.to_lowercase();
+
+    for original_pat in patterns {
+        #[cfg(windows)]
+        let pat = original_pat.to_lowercase();
+        #[cfg(not(windows))]
+        let pat = original_pat.as_str();
+
         // Directory pattern: ends with /
         if pat.ends_with('/') {
             let dir_pat = &pat[..pat.len() - 1];
@@ -55,9 +64,33 @@ pub fn is_ignored(name: &str, patterns: &[String]) -> bool {
             continue;
         }
         // Literal match
-        if name.eq_ignore_ascii_case(pat) {
+        if name.eq_ignore_ascii_case(&pat) {
             return true;
         }
     }
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[cfg(windows)]
+    fn wildcard_case_insensitive_on_windows() {
+        assert!(is_ignored("FOO.TMP", &["*.tmp".to_string()]));
+        assert!(is_ignored("Foo.Tmp", &["*.tmp".to_string()]));
+        assert!(is_ignored("BAR.EXE", &["*.exe".to_string()]));
+        assert!(is_ignored("prefixSUFFIX.txt", &["prefix*.TXT".to_string()]));
+        assert!(is_ignored("README", &["readme".to_string()]));
+        assert!(!is_ignored("foo.tmp", &["*.txt".to_string()]));
+        assert!(!is_ignored("FOO.TMP", &["*.txt".to_string()]));
+    }
+
+    #[test]
+    #[cfg(not(windows))]
+    fn wildcard_case_sensitive_on_non_windows() {
+        assert!(is_ignored("foo.tmp", &["*.tmp".to_string()]));
+        assert!(!is_ignored("FOO.TMP", &["*.tmp".to_string()]));
+    }
 }

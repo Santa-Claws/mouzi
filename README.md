@@ -92,9 +92,9 @@ Auto-detects your system language. Supported:
 
 | Installer | Size | Best For |
 |-----------|------|----------|
-| [`Mouzi_0.1.1_x64-setup.exe`](https://mouzi.cc/download) | ~3.3 MB | Regular users (auto-installer) |
-| [`Mouzi_0.1.1_x64_en-US.msi`](https://mouzi.cc/download) | ~4.7 MB | Enterprise / Active Directory |
-| [`Mouzi_0.1.1_x64-portable.exe`](https://mouzi.cc/download) | ~14 MB | Power users (no install) |
+| [`Mouzi_0.1.2_x64-setup.exe`](https://mouzi.cc/download) | ~3.3 MB | Regular users (auto-installer) |
+| [`Mouzi_0.1.2_x64_en-US.msi`](https://mouzi.cc/download) | ~4.7 MB | Enterprise / Active Directory |
+| [`Mouzi_0.1.2_x64-portable.exe`](https://mouzi.cc/download) | ~14 MB | Power users (no install) |
 
 > ⚠️ **Windows 10/11.** Requires the [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on most systems).
 
@@ -102,19 +102,19 @@ Auto-detects your system language. Supported:
 
 | Package | Size | Best For |
 |---------|------|----------|
-| [`Mouzi_0.1.0_amd64.AppImage`](https://mouzi.cc/download/linux) | ~86 MB | Universal — works on most distros |
-| [`Mouzi_0.1.0_amd64.deb`](https://mouzi.cc/download/linux) | ~6.9 MB | Debian, Ubuntu, Mint, Pop!_OS |
-| [`Mouzi-0.1.0-1.x86_64.rpm`](https://mouzi.cc/download/linux) | ~6.9 MB | Fedora, openSUSE, RHEL |
+| [`Mouzi_0.1.2_amd64.AppImage`](https://mouzi.cc/download/linux) | ~86 MB | Universal — works on most distros |
+| [`Mouzi_0.1.2_amd64.deb`](https://mouzi.cc/download/linux) | ~6.9 MB | Debian, Ubuntu, Mint, Pop!_OS |
+| [`Mouzi-0.1.2-1.x86_64.rpm`](https://mouzi.cc/download/linux) | ~6.9 MB | Fedora, openSUSE, RHEL |
 
 > 🐧 **Linux requirements:** `libwebkit2gtk-4.1` and `libayatana-appindicator3`. Most modern distros have these pre-installed.
 
 **SHA-256 Checksums**
 
 ```
-Mouzi_0.1.1_x64-setup.exe:   (see release page)
-Mouzi_0.1.0_amd64.AppImage:  (see release page)
-Mouzi_0.1.0_amd64.deb:       (see release page)
-Mouzi-0.1.0-1.x86_64.rpm:    (see release page)
+Mouzi_0.1.2_x64-setup.exe:   (see release page)
+Mouzi_0.1.2_amd64.AppImage:  (see release page)
+Mouzi_0.1.2_amd64.deb:       (see release page)
+Mouzi-0.1.2-1.x86_64.rpm:    (see release page)
 ```
 
 ---
@@ -200,34 +200,28 @@ Output will be in `src-tauri/target/release/bundle/`.
 
 ---
 
+## 🆕 What's New in 0.1.2
+
+- **Per-folder manual / paused mode** — collect files without auto-moving, or pause a folder entirely.
+- **Scheduled clean mode** — run Clean Now automatically 1–4 times per day.
+- **Extended grace period** — delay moves from seconds up to 48+ hours.
+- **Export / import rules as JSON** — back up and share your rule sets.
+- **Clean Now bug fix** — respects `.mouziignore` patterns consistently.
+
+---
+
 ## 📋 Roadmap
 
-- [x] MVP with default rules
-- [x] Multi-language support
-- [x] Dark mode
-- [x] History & undo
-- [x] Start with Windows (registry Run key)
-- [x] Custom folders with local rules
-- [x] System files ignored (desktop.ini, Thumbs.db, etc.)
-- [x] Check for updates button
-- [x] `.mouziignore` - per-folder ignore patterns (like `.gitignore`)
-- [x] Portable version (single .exe, no installer)
-- [x] Browser temp files ignored (`.crdownload`, `.part`, `.tmp`)
-- [x] Grace period option - delay moving files by X minutes (so browser download links stay valid)
-- [ ] Extend grace period slider to 48h+ with custom manual input (minutes / hours)
-- [x] File lock check - skip files currently in use by another process
-- [x] Single-instance guard - prevent duplicate processes & tray icons
-- [x] First-run popup visibility - show window on initial launch
-- [x] Clickable toast - open destination folder from popup notification
-- [x] Skip 0KB placeholder files during download
-- [ ] Per-folder manual/paused mode - collect files but don't move until user clicks Clean Now
-- [ ] Scheduled clean mode - run once/2/3/4 times per day instead of real-time
-- [ ] Batch group selected files - select multiple files, one click to group into a folder
-- [ ] Export/import rules as JSON (backup + sharing)
+### Already implemented
+
+MVP with default rules, multi-language support, dark mode, history & undo, start with Windows, custom folders with local rules, system files ignored, check for updates, `.mouziignore`, portable version, browser temp files ignored, grace period option, file lock check, single-instance guard, first-run popup visibility, clickable toast, skip 0 KB placeholder files, Linux port.
+
+### Upcoming
+
+- [ ] Batch group selected files
 - [ ] Suggest mode (modal confirmation per file)
 - [ ] Local AI tagging (ONNX runtime for content classification)
 - [ ] Rule learning from user manual moves
-- [x] Linux port (AppImage, .deb, .rpm)
 - [ ] macOS port
 
 ---

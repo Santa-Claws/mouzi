@@ -42,12 +42,23 @@ export interface AppSettings {
   lock_check_enabled: boolean;
 }
 
+export interface ScheduleSettings {
+  schedule_enabled: boolean;
+  schedule_times_per_day: number;
+  schedule_time_1: string | null;
+  schedule_time_2: string | null;
+  schedule_time_3: string | null;
+  schedule_time_4: string | null;
+}
+
 interface AppState {
   rules: Rule[];
   folders: WatchedFolder[];
   logs: ActionLog[];
   stats: { file_type: string; count: number }[];
   settings: AppSettings | null;
+  schedule: ScheduleSettings | null;
+  pendingFiles: [string, string][];
   isLoading: boolean;
   currentView: 'popup' | 'settings';
 
@@ -63,10 +74,16 @@ interface AppState {
   undoAll: () => Promise<number>;
   addFolder: (path: string, mode: string) => Promise<void>;
   removeFolder: (id: number) => Promise<void>;
+  updateFolderMode: (id: number, mode: string) => Promise<void>;
   addRule: (rule: Rule) => Promise<void>;
   updateRule: (rule: Rule) => Promise<void>;
   deleteRule: (id: number) => Promise<void>;
   clearLogs: () => Promise<void>;
+  getPendingFiles: () => Promise<void>;
+  getSchedule: () => Promise<void>;
+  updateSchedule: (schedule: ScheduleSettings) => Promise<void>;
+  exportRules: (path: string) => Promise<void>;
+  importRules: (path: string, replace: boolean) => Promise<number>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -75,6 +92,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   logs: [],
   stats: [],
   settings: null,
+  schedule: null,
+  pendingFiles: [],
   isLoading: false,
   currentView: 'popup',
 
@@ -171,6 +190,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
+  updateFolderMode: async (id, mode) => {
+    try {
+      await invoke('update_folder_mode_cmd', { id, mode });
+      await get().loadFolders();
+    } catch (e) {
+      console.error('updateFolderMode failed:', e);
+      throw e;
+    }
+  },
+
   addRule: async (rule) => {
     await invoke('add_rule_cmd', { rule });
     await get().loadRules();
@@ -189,5 +218,38 @@ export const useAppStore = create<AppState>((set, get) => ({
   clearLogs: async () => {
     await invoke('clear_logs_cmd');
     set({ logs: [], stats: [] });
+  },
+
+  getPendingFiles: async () => {
+    try {
+      const pendingFiles = await invoke<[string, string][]>('get_pending_files_cmd');
+      set({ pendingFiles });
+    } catch (e) {
+      console.error('getPendingFiles failed:', e);
+    }
+  },
+
+  getSchedule: async () => {
+    try {
+      const schedule = await invoke<ScheduleSettings>('get_schedule_cmd');
+      set({ schedule });
+    } catch (e) {
+      console.error('getSchedule failed:', e);
+    }
+  },
+
+  updateSchedule: async (schedule) => {
+    await invoke('update_schedule_cmd', { schedule });
+    set({ schedule });
+  },
+
+  exportRules: async (path) => {
+    await invoke('export_rules_cmd', { path });
+  },
+
+  importRules: async (path, replace) => {
+    const count = await invoke<number>('import_rules_cmd', { path, replace });
+    await get().loadRules();
+    return count;
   },
 }));

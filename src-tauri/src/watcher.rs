@@ -1,24 +1,27 @@
-use crate::db::get_watched_folders;
-use crate::rules::{process_file, should_ignore_file};
+use crate::db::{get_watched_folders, is_folder_manual_mode, is_folder_paused_mode};
+use crate::rules::{is_file_ignored_by_mouziignore, process_file, should_ignore_file};
 use notify::{Config, Event, RecommendedWatcher, RecursiveMode, Watcher};
-use std::collections::HashMap;
-use std::path::Path;
+use std::collections::{HashMap, HashSet};
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::Emitter;
+#[cfg(not(target_os = "windows"))]
 use tauri_plugin_notification::NotificationExt;
 
 const IGNORE_DURATION_SECS: u64 = 5;
 
 #[derive(Debug, Clone)]
 struct PendingFile {
-    path: std::path::PathBuf,
+    path: PathBuf,
     scheduled: Instant,
 }
 
 pub struct FolderWatcher {
     watchers: HashMap<String, RecommendedWatcher>,
     pending: Arc<Mutex<Vec<PendingFile>>>,
+    /// Files detected in manual-mode folders, waiting for the user to trigger Clean Now.
+    pending_manual: Arc<Mutex<HashSet<String>>>,
     ignored_files: Arc<Mutex<HashMap<String, Instant>>>,
     /// Shared with AppState — stores the last destination folder to open on notification click
     pending_open_folder: Arc<Mutex<Option<String>>>,
@@ -33,6 +36,7 @@ impl FolderWatcher {
         Self {
             watchers: HashMap::new(),
             pending: Arc::new(Mutex::new(Vec::new())),
+            pending_manual: Arc::new(Mutex::new(HashSet::new())),
             ignored_files,
             pending_open_folder,
             handle: None,
@@ -49,7 +53,7 @@ impl FolderWatcher {
             loop {
                 std::thread::sleep(Duration::from_millis(500));
                 let now = Instant::now();
-                let to_process: Vec<std::path::PathBuf> = {
+                let to_process: Vec<PathBuf> = {
                     let mut guard = pending.lock().unwrap();
                     let ready: Vec<_> = guard
                         .iter()
@@ -159,25 +163,38 @@ impl FolderWatcher {
     pub fn watch_folders(&mut self, app_handle: tauri::AppHandle) -> Result<(), String> {
         let folders = get_watched_folders().map_err(|e| e.to_string())?;
         let pending = self.pending.clone();
+        let pending_manual = self.pending_manual.clone();
         let ignored = self.ignored_files.clone();
+        let handle = app_handle.clone();
 
         for folder in folders {
             if !folder.enabled {
+                continue;
+            }
+            if is_folder_paused_mode(&folder.mode) {
+                // Paused folders are kept in the DB but not watched.
                 continue;
             }
             if !Path::new(&folder.path).exists() {
                 eprintln!("[watcher] Skipping missing folder: {}", folder.path);
                 continue;
             }
-            let path = folder.path.clone();
+
+            let is_manual = is_folder_manual_mode(&folder.mode);
+            let folder_path = folder.path.clone();
             let p = pending.clone();
+            let pm = pending_manual.clone();
             let ig = ignored.clone();
+            let h = handle.clone();
 
             let mut watcher = RecommendedWatcher::new(
                 move |res: Result<Event, notify::Error>| {
                     if let Ok(event) = res {
                         for path in event.paths {
-                            if path.is_file() && !should_ignore_file(&path) {
+                            if path.is_file()
+                                && !should_ignore_file(&path)
+                                && !is_file_ignored_by_mouziignore(&path)
+                            {
                                 let path_str = path.to_string_lossy().to_string();
                                 let mut ignore_guard = ig.lock().unwrap();
                                 if let Some(&instant) = ignore_guard.get(&path_str) {
@@ -187,16 +204,34 @@ impl FolderWatcher {
                                     ignore_guard.remove(&path_str);
                                 }
                                 drop(ignore_guard);
-                                let grace = crate::db::get_settings()
-                                    .map(|s| s.grace_period_seconds as u64)
-                                    .unwrap_or(300);
-                                let mut guard = p.lock().unwrap();
-                                // Remove existing pending entry for this path to reschedule
-                                guard.retain(|x| x.path != path);
-                                guard.push(PendingFile {
-                                    path,
-                                    scheduled: Instant::now() + Duration::from_secs(grace),
-                                });
+
+                                if is_manual {
+                                    // Manual mode: collect for later, do not auto-organize.
+                                    let file_name = path.file_name()
+                                        .unwrap_or_default()
+                                        .to_string_lossy()
+                                        .to_string();
+                                    let mut manual = pm.lock().unwrap();
+                                    manual.insert(path_str.clone());
+                                    drop(manual);
+
+                                    let _ = h.emit("file-detected", serde_json::json!({
+                                        "folder": folder_path,
+                                        "file": file_name,
+                                    }));
+                                } else {
+                                    // Silent mode: schedule for auto-organize after grace period.
+                                    let grace = crate::db::get_settings()
+                                        .map(|s| s.grace_period_seconds as u64)
+                                        .unwrap_or(300);
+                                    let mut guard = p.lock().unwrap();
+                                    // Remove existing pending entry for this path to reschedule
+                                    guard.retain(|x| x.path != path);
+                                    guard.push(PendingFile {
+                                        path,
+                                        scheduled: Instant::now() + Duration::from_secs(grace),
+                                    });
+                                }
                             }
                         }
                     }
@@ -214,7 +249,10 @@ impl FolderWatcher {
             self.watchers.insert(folder.path, watcher);
         }
 
-        self.start(app_handle);
+        // Only start the processing thread once. refresh() reuses the same thread.
+        if self.handle.is_none() {
+            self.start(app_handle);
+        }
         Ok(())
     }
 
@@ -225,5 +263,54 @@ impl FolderWatcher {
 
     pub fn set_ignored_files(&mut self, ignored_files: Arc<Mutex<HashMap<String, Instant>>>) {
         self.ignored_files = ignored_files;
+    }
+
+    /// Return the list of files detected in manual-mode folders that have not yet
+    /// been organized. Non-existent files are pruned automatically.
+    pub fn get_pending_files(&self) -> Vec<(String, String)> {
+        let mut manual = self.pending_manual.lock().unwrap();
+        manual.retain(|p| Path::new(p).exists());
+        manual
+            .iter()
+            .filter_map(|path| {
+                let p = Path::new(path);
+                let folder = p.parent()?.to_string_lossy().to_string();
+                let name = p.file_name()?.to_string_lossy().to_string();
+                Some((folder, name))
+            })
+            .collect()
+    }
+
+    /// Move any manually-collected files for the given folder into the auto-organize
+    /// queue. Called when a folder is switched from manual back to silent.
+    pub fn flush_manual_to_pending(&mut self, folder_path: &str) {
+        let mut manual = self.pending_manual.lock().unwrap();
+        let to_move: Vec<String> = manual
+            .iter()
+            .filter(|p| {
+                Path::new(p)
+                    .parent()
+                    .map(|parent| parent.to_string_lossy() == folder_path)
+                    .unwrap_or(false)
+            })
+            .cloned()
+            .collect();
+        for p in &to_move {
+            manual.remove(p);
+        }
+        drop(manual);
+
+        let grace = crate::db::get_settings()
+            .map(|s| s.grace_period_seconds as u64)
+            .unwrap_or(300);
+        let mut pending = self.pending.lock().unwrap();
+        for path_str in to_move {
+            let path = PathBuf::from(path_str);
+            pending.retain(|x| x.path != path);
+            pending.push(PendingFile {
+                path,
+                scheduled: Instant::now() + Duration::from_secs(grace),
+            });
+        }
     }
 }

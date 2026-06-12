@@ -3,11 +3,12 @@ pub mod db;
 pub mod i18n;
 pub mod ignore;
 pub mod rules;
+pub mod scheduler;
 pub mod tray;
 pub mod watcher;
 
 use commands::*;
-use db::init_db;
+use db::{init_db, FOLDER_MODE_SILENT};
 use directories::ProjectDirs;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -21,6 +22,7 @@ pub struct AppState {
     pub ignored_files: Arc<Mutex<HashMap<String, Instant>>>,
     /// Last destination folder waiting to be opened when app is activated by notification click
     pub pending_open_folder: Arc<Mutex<Option<String>>>,
+    pub scheduler: scheduler::Scheduler,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -30,6 +32,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--autostart"]),
@@ -71,6 +74,7 @@ pub fn run() {
             ))),
             ignored_files,
             pending_open_folder,
+            scheduler: scheduler::Scheduler::new(),
         })
         .setup(|app| {
             let app_handle = app.handle().clone();
@@ -87,7 +91,7 @@ pub fn run() {
                 let first = settings.first_run;
                 if first {
                     let downloads = commands::get_downloads_folder();
-                    let _ = db::add_watched_folder(&downloads, "silent");
+                    let _ = db::add_watched_folder(&downloads, FOLDER_MODE_SILENT);
                     let _ = db::insert_default_rules(&downloads);
                     let mut new_settings = settings;
                     new_settings.first_run = false;
@@ -121,8 +125,13 @@ pub fn run() {
 
             // Start folder watcher
             let state = app.state::<AppState>();
-            let mut watcher = state.watcher.lock().unwrap();
-            let _ = watcher.watch_folders(app_handle.clone());
+            {
+                let mut watcher = state.watcher.lock().unwrap();
+                let _ = watcher.watch_folders(app_handle.clone());
+            }
+
+            // Start scheduled-clean background thread
+            state.scheduler.start(app_handle.clone());
 
             Ok(())
         })
@@ -158,6 +167,12 @@ pub fn run() {
             save_mouziignore_cmd,
             get_pending_open_folder_cmd,
             show_popup_cmd,
+            get_pending_files_cmd,
+            refresh_watcher_cmd,
+            get_schedule_cmd,
+            update_schedule_cmd,
+            export_rules_cmd,
+            import_rules_cmd,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

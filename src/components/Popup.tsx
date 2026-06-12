@@ -42,6 +42,8 @@ export default function Popup() {
     scanFolder,
     undoAction,
     folders,
+    pendingFiles,
+    getPendingFiles,
   } = useAppStore();
   const [scanResults, setScanResults] = useState<
     { file: string; rule: string; destination: string }[]
@@ -57,6 +59,7 @@ export default function Popup() {
     loadLogs();
     loadStats();
     loadFolders();
+    getPendingFiles();
 
     // Listen for file-organized events from Rust watcher — show in-app toast
     const unlisten = listen("file-organized", (event: any) => {
@@ -73,13 +76,20 @@ export default function Popup() {
         setTimeout(() => setToast(null), 30000);
         loadLogs();
         loadStats();
+        getPendingFiles();
       }
     });
 
+    // Poll for pending files in manual-mode folders
+    const interval = setInterval(() => {
+      getPendingFiles();
+    }, 3000);
+
     return () => {
       unlisten.then((f) => f());
+      clearInterval(interval);
     };
-  }, [loadLogs, loadStats, loadFolders]);
+  }, [loadLogs, loadStats, loadFolders, getPendingFiles]);
 
 
 
@@ -91,6 +101,7 @@ export default function Popup() {
       allResults = allResults.concat(results);
     }
     setScanResults(allResults);
+    await getPendingFiles();
     if (allResults.length > 0) {
       await invoke("show_notification", {
         title: t("app.name"),
@@ -137,6 +148,11 @@ export default function Popup() {
           <Sparkles size={15} />
           {isLoading ? "..." : t("popup.cleanNow")}
         </button>
+        {pendingFiles.length > 0 && (
+          <div className="text-center text-xs text-text-muted">
+            {t("popup.pendingFiles", { count: pendingFiles.length })}
+          </div>
+        )}
         <button
           onClick={handleOpenDownloads}
           className="w-full flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-surface-dark transition-colors"

@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppStore, Rule } from "../store/useAppStore";
+import { useAppStore, Rule, ScheduleSettings } from "../store/useAppStore";
 import { invoke } from "@tauri-apps/api/core";
+import { save, open } from "@tauri-apps/plugin-dialog";
 import {
   Folder,
   List,
@@ -15,12 +16,69 @@ import {
   ChevronLeft,
   RotateCcw,
   Download,
+  Upload,
   ExternalLink,
   Heart,
 } from "lucide-react";
 
 
 type Tab = "folders" | "rules" | "history" | "ignore" | "general";
+type GraceUnit = "seconds" | "minutes" | "hours";
+
+const GRACE_STEPS = [
+  0, 30, 60, 300, 900, 1800, 3600, 7200, 21600, 43200, 86400, 172800, 604800,
+];
+const MAX_GRACE_SECONDS = 604800; // 7 days
+
+function formatDuration(seconds: number): string {
+  if (seconds <= 0) return "0s";
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (secs > 0) parts.push(`${secs}s`);
+  return parts.join(" ") || "0s";
+}
+
+function secondsToUnit(seconds: number): { value: number; unit: GraceUnit } {
+  if (seconds % 3600 === 0 && seconds >= 3600) {
+    return { value: seconds / 3600, unit: "hours" };
+  }
+  if (seconds % 60 === 0 && seconds >= 60) {
+    return { value: seconds / 60, unit: "minutes" };
+  }
+  return { value: seconds, unit: "seconds" };
+}
+
+function unitToSeconds(value: number, unit: GraceUnit): number {
+  switch (unit) {
+    case "hours":
+      return value * 3600;
+    case "minutes":
+      return value * 60;
+    default:
+      return value;
+  }
+}
+
+function nearestGraceStep(seconds: number): number {
+  return GRACE_STEPS.reduce((prev, curr) =>
+    Math.abs(curr - seconds) < Math.abs(prev - seconds) ? curr : prev
+  );
+}
+
+function defaultSchedule(): ScheduleSettings {
+  return {
+    schedule_enabled: false,
+    schedule_times_per_day: 1,
+    schedule_time_1: "08:00",
+    schedule_time_2: null,
+    schedule_time_3: null,
+    schedule_time_4: null,
+  };
+}
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
@@ -33,6 +91,7 @@ export default function Settings() {
     loadLogs,
     addFolder,
     removeFolder,
+    updateFolderMode,
     addRule,
     updateRule,
     deleteRule,
@@ -42,17 +101,49 @@ export default function Settings() {
     settings,
     saveSettings,
     setAutostart,
+    schedule,
+    getSchedule,
+    updateSchedule,
+    exportRules,
+    importRules,
   } = useAppStore();
 
   const [tab, setTab] = useState<Tab>("folders");
   const [editingRule, setEditingRule] = useState<Rule | null>(null);
   const [newFolderPath, setNewFolderPath] = useState("");
 
+  const [graceValue, setGraceValue] = useState(300);
+  const [graceUnit, setGraceUnit] = useState<GraceUnit>("seconds");
+  const [graceError, setGraceError] = useState<string | null>(null);
+
+  const [localSchedule, setLocalSchedule] = useState<ScheduleSettings>(defaultSchedule());
+  const [ruleToast, setRuleToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [replaceOnImport, setReplaceOnImport] = useState(false);
+
   useEffect(() => {
     loadRules();
     loadFolders();
     loadLogs();
-  }, [loadRules, loadFolders, loadLogs]);
+    getSchedule();
+  }, [loadRules, loadFolders, loadLogs, getSchedule]);
+
+  // Sync local grace editor with loaded settings
+  useEffect(() => {
+    if (settings) {
+      const clamped = Math.min(settings.grace_period_seconds, MAX_GRACE_SECONDS);
+      const converted = secondsToUnit(clamped);
+      setGraceValue(converted.value);
+      setGraceUnit(converted.unit);
+      setGraceError(null);
+    }
+  }, [settings?.grace_period_seconds]);
+
+  // Sync local schedule editor with loaded schedule
+  useEffect(() => {
+    if (schedule) {
+      setLocalSchedule(schedule);
+    }
+  }, [schedule]);
 
   const handleAddFolder = async () => {
     if (!newFolderPath.trim()) return;
@@ -75,6 +166,101 @@ export default function Settings() {
     await i18n.changeLanguage(lang);
     await saveSettings({ ...settings, language: lang });
   };
+
+  const handleGraceSliderChange = (stepIndex: number) => {
+    if (!settings) return;
+    const seconds = GRACE_STEPS[stepIndex];
+    const converted = secondsToUnit(seconds);
+    setGraceValue(converted.value);
+    setGraceUnit(converted.unit);
+    setGraceError(null);
+    saveSettings({ ...settings, grace_period_seconds: seconds });
+  };
+
+  const handleGraceNumberChange = (value: number, unit: GraceUnit) => {
+    if (!settings) return;
+    const seconds = unitToSeconds(value, unit);
+    if (seconds > MAX_GRACE_SECONDS) {
+      setGraceError(t("settings.general.gracePeriodMaxError"));
+      setGraceValue(value);
+      setGraceUnit(unit);
+      return;
+    }
+    setGraceError(null);
+    setGraceValue(value);
+    setGraceUnit(unit);
+    saveSettings({ ...settings, grace_period_seconds: Math.max(0, seconds) });
+  };
+
+  const handleScheduleChange = (patch: Partial<ScheduleSettings>) => {
+    setLocalSchedule((prev) => {
+      const next = { ...prev, ...patch };
+      const times = Math.max(1, Math.min(4, next.schedule_times_per_day || 1));
+      // Ensure required time slots have defaults when increasing count
+      if (times >= 1 && !next.schedule_time_1) next.schedule_time_1 = "08:00";
+      if (times >= 2 && !next.schedule_time_2) next.schedule_time_2 = "14:00";
+      if (times >= 3 && !next.schedule_time_3) next.schedule_time_3 = "20:00";
+      if (times >= 4 && !next.schedule_time_4) next.schedule_time_4 = "23:00";
+      return { ...next, schedule_times_per_day: times };
+    });
+  };
+
+  const handleSaveSchedule = async () => {
+    try {
+      await updateSchedule(localSchedule);
+    } catch (e) {
+      console.error("Failed to save schedule:", e);
+    }
+  };
+
+  const handleExportRules = async () => {
+    try {
+      const path = await save({
+        filters: [{ name: "JSON", extensions: ["json"] }],
+        defaultPath: "mouzi-rules.json",
+      });
+      if (path) {
+        await exportRules(path);
+        setRuleToast({ message: t("settings.rules.exportSuccess"), type: "success" });
+      }
+    } catch (e) {
+      console.error("Export rules failed:", e);
+      setRuleToast({ message: t("settings.rules.exportError"), type: "error" });
+    }
+    setTimeout(() => setRuleToast(null), 3000);
+  };
+
+  const handleImportRules = async () => {
+    try {
+      const selected = await open({
+        filters: [{ name: "JSON", extensions: ["json"] }],
+        multiple: false,
+      });
+      const path = Array.isArray(selected) ? selected[0] : selected;
+      if (path) {
+        const count = await importRules(path, replaceOnImport);
+        setRuleToast({
+          message: t("settings.rules.importSuccess", { count }),
+          type: "success",
+        });
+      }
+    } catch (e) {
+      console.error("Import rules failed:", e);
+      setRuleToast({ message: t("settings.rules.importError"), type: "error" });
+    }
+    setTimeout(() => setRuleToast(null), 3000);
+  };
+
+  const currentGraceSeconds = useMemo(
+    () => unitToSeconds(graceValue, graceUnit),
+    [graceValue, graceUnit]
+  );
+
+  const sliderIndex = useMemo(() => {
+    const clamped = Math.min(currentGraceSeconds, MAX_GRACE_SECONDS);
+    const nearest = nearestGraceStep(clamped);
+    return GRACE_STEPS.indexOf(nearest);
+  }, [currentGraceSeconds]);
 
   return (
     <div className="flex h-full bg-surface text-text">
@@ -150,15 +336,31 @@ export default function Settings() {
               {folders.map((f) => (
                 <div
                   key={f.id}
-                  className="flex items-center justify-between rounded-lg border border-border px-4 py-3"
+                  className="flex items-center justify-between rounded-lg border border-border px-4 py-3 gap-3"
                 >
-                  <div>
-                    <div className="text-sm font-medium">{f.path}</div>
-                    <div className="text-xs text-text-muted capitalize">{f.mode}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium truncate">{f.path}</div>
+                    <div className="mt-1.5">
+                      <label className="text-[10px] uppercase tracking-wide text-text-muted block mb-1">
+                        {t("settings.folders.mode")}
+                      </label>
+                      <select
+                        value={f.mode || "silent"}
+                        onChange={(e) => f.id && updateFolderMode(f.id, e.target.value)}
+                        className="w-full max-w-xs rounded-md border border-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-primary"
+                      >
+                        <option value="silent">{t("settings.folders.modeSilent")}</option>
+                        <option value="manual">{t("settings.folders.modeManual")}</option>
+                        <option value="paused">{t("settings.folders.modePaused")}</option>
+                      </select>
+                      <p className="text-[10px] text-text-muted mt-1">
+                        {t("settings.folders.modeDesc")}
+                      </p>
+                    </div>
                   </div>
                   <button
                     onClick={() => f.id && removeFolder(f.id)}
-                    className="p-1.5 rounded-md text-red-500 hover:bg-red-50"
+                    className="p-1.5 rounded-md text-red-500 hover:bg-red-50 shrink-0"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -190,6 +392,45 @@ export default function Settings() {
                 <Plus size={14} />
                 {t("settings.rules.add")}
               </button>
+            </div>
+
+            {/* Export / Import */}
+            <div className="rounded-lg border border-border bg-surface-dark p-4 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handleExportRules}
+                  className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm hover:bg-surface transition-colors"
+                >
+                  <Download size={14} />
+                  {t("settings.rules.export")}
+                </button>
+                <button
+                  onClick={handleImportRules}
+                  className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm hover:bg-surface transition-colors"
+                >
+                  <Upload size={14} />
+                  {t("settings.rules.import")}
+                </button>
+              </div>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={replaceOnImport}
+                  onChange={(e) => setReplaceOnImport(e.target.checked)}
+                />
+                {t("settings.rules.replaceOnImport")}
+              </label>
+              {ruleToast && (
+                <div
+                  className={`text-xs px-3 py-2 rounded-md ${
+                    ruleToast.type === "success"
+                      ? "bg-green-50 text-green-700 border border-green-200"
+                      : "bg-red-50 text-red-700 border border-red-200"
+                  }`}
+                >
+                  {ruleToast.message}
+                </div>
+              )}
             </div>
 
             {editingRule && (
@@ -442,27 +683,43 @@ export default function Settings() {
                     {t("settings.general.gracePeriod")}
                   </label>
                   <span className="text-xs text-text-muted">
-                    {settings?.grace_period_seconds !== undefined
-                      ? settings.grace_period_seconds >= 60
-                        ? `${(settings.grace_period_seconds / 60).toFixed(0)} min`
-                        : `${settings.grace_period_seconds}s`
-                      : "5 min"}
+                    {formatDuration(currentGraceSeconds)}
                   </span>
                 </div>
                 <input
                   type="range"
                   min={0}
-                  max={600}
-                  step={30}
-                  value={settings?.grace_period_seconds ?? 300}
-                  onChange={(e) => {
-                    if (!settings) return;
-                    const val = parseInt(e.target.value, 10);
-                    const updated = { ...settings, grace_period_seconds: val };
-                    saveSettings(updated);
-                  }}
+                  max={GRACE_STEPS.length - 1}
+                  step={1}
+                  value={sliderIndex}
+                  onChange={(e) => handleGraceSliderChange(parseInt(e.target.value, 10))}
                   className="w-full accent-primary"
                 />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0}
+                    value={graceValue}
+                    onChange={(e) =>
+                      handleGraceNumberChange(parseInt(e.target.value, 10) || 0, graceUnit)
+                    }
+                    className="w-24 rounded-md border border-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-primary"
+                  />
+                  <select
+                    value={graceUnit}
+                    onChange={(e) =>
+                      handleGraceNumberChange(graceValue, e.target.value as GraceUnit)
+                    }
+                    className="rounded-md border border-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-primary"
+                  >
+                    <option value="seconds">{t("settings.general.gracePeriodSeconds")}</option>
+                    <option value="minutes">{t("settings.general.gracePeriodMinutes")}</option>
+                    <option value="hours">{t("settings.general.gracePeriodHours")}</option>
+                  </select>
+                </div>
+                {graceError && (
+                  <p className="text-xs text-red-500">{graceError}</p>
+                )}
                 <p className="text-xs text-text-muted">
                   {t("settings.general.gracePeriodDesc")}
                 </p>
@@ -495,6 +752,79 @@ export default function Settings() {
                   />
                 </button>
               </div>
+            </div>
+
+            {/* Scheduler */}
+            <div className="border-t border-border pt-6 space-y-4">
+              <div>
+                <h3 className="text-base font-semibold">{t("settings.scheduler.title")}</h3>
+                <p className="text-xs text-text-muted">{t("settings.scheduler.desc")}</p>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-text-muted">
+                  {t("settings.scheduler.enable")}
+                </label>
+                <button
+                  onClick={() => handleScheduleChange({ schedule_enabled: !localSchedule.schedule_enabled })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    localSchedule.schedule_enabled ? "bg-primary" : "bg-surface-dark"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      localSchedule.schedule_enabled ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-text-muted block mb-2">
+                  {t("settings.scheduler.timesPerDay")}
+                </label>
+                <select
+                  value={localSchedule.schedule_times_per_day}
+                  onChange={(e) =>
+                    handleScheduleChange({ schedule_times_per_day: parseInt(e.target.value, 10) })
+                  }
+                  className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                >
+                  <option value={1}>{t("settings.scheduler.once")}</option>
+                  <option value={2}>{t("settings.scheduler.twice")}</option>
+                  <option value={3}>{t("settings.scheduler.thrice")}</option>
+                  <option value={4}>{t("settings.scheduler.fourTimes")}</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                {Array.from({ length: localSchedule.schedule_times_per_day }).map((_, idx) => {
+                  const key = `schedule_time_${idx + 1}` as keyof ScheduleSettings;
+                  return (
+                    <div key={idx}>
+                      <label className="text-xs font-medium text-text-muted block mb-1">
+                        {t("settings.scheduler.time", { number: idx + 1 })}
+                      </label>
+                      <input
+                        type="time"
+                        value={(localSchedule[key] as string | null) || ""}
+                        onChange={(e) =>
+                          handleScheduleChange({ [key]: e.target.value || null } as Partial<ScheduleSettings>)
+                        }
+                        className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={handleSaveSchedule}
+                className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+              >
+                <Save size={14} />
+                {t("settings.rules.edit")}
+              </button>
             </div>
 
             <div className="border-t border-border" />

@@ -15,7 +15,9 @@
     "settings": "Settings",
     "quit": "Quit",
     "organized": "Organized: {{file}}",
-    "openFolder": "Click to open → {{folder}}"
+    "openFolder": "Click to open → {{folder}}",
+    "pendingFiles": "{{count}} files waiting",
+    "cleanManual": "Clean Now"
   },
   "settings": {
     "title": "Mouzi Settings",
@@ -26,7 +28,11 @@
       "mode": "Mode",
       "silent": "Silent",
       "suggest": "Suggest",
-      "placeholder": "C:/Users/.../Downloads"
+      "placeholder": "C:/Users/.../Downloads",
+      "modeSilent": "Silent (auto)",
+      "modeManual": "Manual (collect only)",
+      "modePaused": "Paused",
+      "modeDesc": "Choose how Mouzi handles files in this folder."
     },
     "rules": {
       "title": "Rules",
@@ -39,7 +45,14 @@
       "pattern": "Pattern",
       "priority": "Priority",
       "action": "Action",
-      "enabled": "Enabled"
+      "enabled": "Enabled",
+      "export": "Export Rules",
+      "import": "Import Rules",
+      "exportSuccess": "Rules exported",
+      "importSuccess": "Imported {{count}} rules",
+      "importError": "Failed to import rules",
+      "exportError": "Failed to export rules",
+      "replaceOnImport": "Replace existing rules (otherwise append)"
     },
     "history": {
       "title": "History",
@@ -61,7 +74,12 @@
       "gracePeriod": "Grace period",
       "gracePeriodDesc": "Wait time before moving a file after it was last modified. 0 = instant.",
       "checkFileLock": "Check file lock",
-      "checkFileLockDesc": "Skip files currently in use by another process"
+      "checkFileLockDesc": "Skip files currently in use by another process",
+      "gracePeriodSeconds": "Seconds",
+      "gracePeriodMinutes": "Minutes",
+      "gracePeriodHours": "Hours",
+      "gracePeriodCustom": "Custom",
+      "gracePeriodMaxError": "Grace period cannot exceed 7 days"
     },
     "ignore": {
       "title": "Ignore",
@@ -85,6 +103,17 @@
       "support": "Support Mouzi on Ko-fi",
       "supportDesc": "Your support keeps Mouzi improving. Thank you! 🙏",
       "builtBy": "Built with care by hsr"
+    },
+    "scheduler": {
+      "title": "Scheduler",
+      "enable": "Enable scheduled cleaning",
+      "timesPerDay": "Times per day",
+      "time": "Time {{number}}",
+      "desc": "Run Clean Now automatically at scheduled times.",
+      "once": "Once per day",
+      "twice": "Twice per day",
+      "thrice": "3 times per day",
+      "fourTimes": "4 times per day"
     }
   },
   "notifications": {

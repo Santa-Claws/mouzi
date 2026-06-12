@@ -15,7 +15,9 @@
     "settings": "Paramètres",
     "quit": "Quitter",
     "organized": "Organized: {{file}}",
-    "openFolder": "Click to open → {{folder}}"
+    "openFolder": "Click to open → {{folder}}",
+    "pendingFiles": "{{count}} fichiers en attente",
+    "cleanManual": "Nettoyer maintenant"
   },
   "settings": {
     "title": "Paramètres Mouzi",
@@ -26,7 +28,11 @@
       "mode": "Mode",
       "silent": "Silencieux",
       "suggest": "Suggérer",
-      "placeholder": "C:/Users/.../Downloads"
+      "placeholder": "C:/Users/.../Downloads",
+      "modeSilent": "Silencieux (auto)",
+      "modeManual": "Manuel (collecte uniquement)",
+      "modePaused": "En pause",
+      "modeDesc": "Choisissez comment Mouzi gère les fichiers dans ce dossier."
     },
     "rules": {
       "title": "Règles",
@@ -39,7 +45,14 @@
       "pattern": "Pattern",
       "priority": "Priorité",
       "action": "Action",
-      "enabled": "Activée"
+      "enabled": "Activée",
+      "export": "Exporter les règles",
+      "import": "Importer les règles",
+      "exportSuccess": "Règles exportées",
+      "importSuccess": "{{count}} règles importées",
+      "importError": "Échec de l'importation des règles",
+      "exportError": "Échec de l'exportation des règles",
+      "replaceOnImport": "Remplacer les règles existantes (sinon ajouter)"
     },
     "history": {
       "title": "Historique",
@@ -61,7 +74,12 @@
       "gracePeriod": "Grace period",
       "gracePeriodDesc": "Wait time before moving a file after it was last modified. 0 = instant.",
       "checkFileLock": "Check file lock",
-      "checkFileLockDesc": "Skip files currently in use by another process"
+      "checkFileLockDesc": "Skip files currently in use by another process",
+      "gracePeriodSeconds": "Secondes",
+      "gracePeriodMinutes": "Minutes",
+      "gracePeriodHours": "Heures",
+      "gracePeriodCustom": "Personnalisé",
+      "gracePeriodMaxError": "La période de grâce ne peut pas dépasser 7 jours"
     },
     "ignore": {
       "title": "Ignore",
@@ -85,6 +103,17 @@
       "support": "Support Mouzi on Ko-fi",
       "supportDesc": "Your support keeps Mouzi improving. Thank you! 🙏",
       "builtBy": "Conçu avec soin par hsr"
+    },
+    "scheduler": {
+      "title": "Planificateur",
+      "enable": "Activer le nettoyage planifié",
+      "timesPerDay": "Fois par jour",
+      "time": "Heure {{number}}",
+      "desc": "Lancez le nettoyage automatiquement aux heures planifiées.",
+      "once": "Une fois par jour",
+      "twice": "Deux fois par jour",
+      "thrice": "3 fois par jour",
+      "fourTimes": "4 fois par jour"
     }
   },
   "notifications": {
