@@ -59,6 +59,20 @@ pub fn show_popup_window(app: &AppHandle) {
         let _ = window.show();
         let _ = window.set_focus();
     } else {
+        #[cfg(target_os = "macos")]
+        let window = tauri::WebviewWindowBuilder::new(
+            app,
+            "popup",
+            tauri::WebviewUrl::App("/#/popup".into()),
+        )
+        .title(i18n.get("popup_title"))
+        .inner_size(300.0, 420.0)
+        .decorations(false)
+        .always_on_top(true)
+        .shadow(false)
+        .build();
+
+        #[cfg(not(target_os = "macos"))]
         let window = tauri::WebviewWindowBuilder::new(
             app,
             "popup",
