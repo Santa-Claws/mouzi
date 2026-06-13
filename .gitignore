@@ -42,6 +42,9 @@ Thumbs.db
 *.exe
 *.msi
 *.msix
+
+# Scratch / temp files
+scratch_*
 # But keep released installers in docs
 !docs/download/*.exe
 !docs/download/*.msi

@@ -1,7 +1,7 @@
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager};
-use crate::db::{get_settings, get_watched_folders};
+use crate::db::{get_settings, get_watched_folders, is_folder_paused_mode};
 use crate::i18n::TrayI18n;
 use crate::rules::manual_scan_folder;
 
@@ -99,7 +99,7 @@ fn perform_clean(app: &AppHandle) -> Result<(), String> {
     let folders = get_watched_folders().map_err(|e| e.to_string())?;
     let mut total = 0;
     for folder in folders {
-        if !folder.enabled { continue; }
+        if !folder.enabled || is_folder_paused_mode(&folder.mode) { continue; }
         if let Ok(results) = manual_scan_folder(&folder.path) {
             total += results.len();
         }
@@ -109,6 +109,21 @@ fn perform_clean(app: &AppHandle) -> Result<(), String> {
         let _ = app.emit("show-notification", msg);
     }
     Ok(())
+}
+
+pub fn update_tray_tooltip(app: &AppHandle, count: usize) {
+    let i18n = TrayI18n::new(&tray_lang(app));
+    let tooltip = if count == 0 {
+        i18n.get("tooltip").to_string()
+    } else if count == 1 {
+        i18n.get("tooltip_one_pending").replace("{}", "1")
+    } else {
+        i18n.get("tooltip_many_pending")
+            .replace("{}", &count.to_string())
+    };
+    if let Some(tray) = app.tray_by_id("tray") {
+        let _ = tray.set_tooltip(Some(&tooltip));
+    }
 }
 
 pub fn show_settings_window(app: &AppHandle) {

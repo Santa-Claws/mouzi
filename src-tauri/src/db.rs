@@ -186,7 +186,6 @@ pub fn init_db(app_dir: PathBuf) -> SqliteResult<()> {
     if !cols.iter().any(|c| c == "schedule_time_4") {
         conn.execute("ALTER TABLE settings ADD COLUMN schedule_time_4 TEXT", [])?;
     }
-
     // Insert default settings if empty
     let count: i64 = conn.query_row(
         "SELECT COUNT(*) FROM settings",

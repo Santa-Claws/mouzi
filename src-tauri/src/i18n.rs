@@ -13,6 +13,8 @@ impl TrayI18n {
                 strings.insert("settings", "Ustawienia");
                 strings.insert("clean_now", "Posprzątaj teraz");
                 strings.insert("tooltip", "Mouzi");
+                strings.insert("tooltip_one_pending", "Mouzi – {} plik czeka");
+                strings.insert("tooltip_many_pending", "Mouzi – {} pliki czekają");
                 strings.insert("popup_title", "Mouzi");
                 strings.insert("settings_title", "Ustawienia Mouzi");
                 strings.insert("organized", "Uporządkowano {} plik(i)");
@@ -22,6 +24,8 @@ impl TrayI18n {
                 strings.insert("settings", "Impostazioni");
                 strings.insert("clean_now", "Pulisci ora");
                 strings.insert("tooltip", "Mouzi");
+                strings.insert("tooltip_one_pending", "Mouzi – {} file in attesa");
+                strings.insert("tooltip_many_pending", "Mouzi – {} file in attesa");
                 strings.insert("popup_title", "Mouzi");
                 strings.insert("settings_title", "Impostazioni Mouzi");
                 strings.insert("organized", "Organizzati {} file");
@@ -31,6 +35,8 @@ impl TrayI18n {
                 strings.insert("settings", "Einstellungen");
                 strings.insert("clean_now", "Jetzt aufräumen");
                 strings.insert("tooltip", "Mouzi");
+                strings.insert("tooltip_one_pending", "Mouzi – {} Datei wartend");
+                strings.insert("tooltip_many_pending", "Mouzi – {} Dateien wartend");
                 strings.insert("popup_title", "Mouzi");
                 strings.insert("settings_title", "Mouzi Einstellungen");
                 strings.insert("organized", "{} Datei(en) organisiert");
@@ -40,6 +46,8 @@ impl TrayI18n {
                 strings.insert("settings", "Paramètres");
                 strings.insert("clean_now", "Nettoyer maintenant");
                 strings.insert("tooltip", "Mouzi");
+                strings.insert("tooltip_one_pending", "Mouzi – {} fichier en attente");
+                strings.insert("tooltip_many_pending", "Mouzi – {} fichiers en attente");
                 strings.insert("popup_title", "Mouzi");
                 strings.insert("settings_title", "Paramètres Mouzi");
                 strings.insert("organized", "{} fichier(s) organisé(s)");
@@ -49,6 +57,8 @@ impl TrayI18n {
                 strings.insert("settings", "Настройки");
                 strings.insert("clean_now", "Очистить сейчас");
                 strings.insert("tooltip", "Mouzi");
+                strings.insert("tooltip_one_pending", "Mouzi – {} файл ожидает");
+                strings.insert("tooltip_many_pending", "Mouzi – {} файла ожидают");
                 strings.insert("popup_title", "Mouzi");
                 strings.insert("settings_title", "Настройки Mouzi");
                 strings.insert("organized", "Организовано {} файл(ов)");
@@ -58,6 +68,8 @@ impl TrayI18n {
                 strings.insert("settings", "設定");
                 strings.insert("clean_now", "今すぐ整理");
                 strings.insert("tooltip", "Mouzi");
+                strings.insert("tooltip_one_pending", "Mouzi – {} 個のファイルが待機中");
+                strings.insert("tooltip_many_pending", "Mouzi – {} 個のファイルが待機中");
                 strings.insert("popup_title", "Mouzi");
                 strings.insert("settings_title", "Mouziの設定");
                 strings.insert("organized", "{}個のファイルを整理しました");
@@ -67,6 +79,8 @@ impl TrayI18n {
                 strings.insert("settings", "Settings");
                 strings.insert("clean_now", "Clean Now");
                 strings.insert("tooltip", "Mouzi");
+                strings.insert("tooltip_one_pending", "Mouzi – {} file waiting");
+                strings.insert("tooltip_many_pending", "Mouzi – {} files waiting");
                 strings.insert("popup_title", "Mouzi");
                 strings.insert("settings_title", "Mouzi Settings");
                 strings.insert("organized", "Organized {} file(s)");

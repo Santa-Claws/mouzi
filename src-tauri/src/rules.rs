@@ -101,9 +101,6 @@ pub fn scan_file(path: &Path) -> Option<FileInfo> {
         return None;
     }
     let metadata = fs::metadata(path).ok()?;
-    if metadata.len() == 0 {
-        return None; // Skip empty placeholder files (e.g. browser download stubs)
-    }
     let name = path.file_name()?.to_string_lossy().to_string();
     let extension = path
         .extension()
@@ -196,12 +193,12 @@ pub fn execute_rule(file_info: &FileInfo, rule: &Rule) -> Result<String, String>
     }
 }
 
-pub fn process_file(path: &Path) -> Result<Option<(Rule, String)>, String> {
+pub fn process_file(path: &Path, bypass_grace: bool) -> Result<Option<(Rule, String)>, String> {
     let (grace_period, lock_check) = get_settings()
         .map(|s| (s.grace_period_seconds, s.lock_check_enabled))
         .unwrap_or((300, true));
 
-    if !check_grace_period(path, grace_period) {
+    if !bypass_grace && !check_grace_period(path, grace_period) {
         return Ok(None);
     }
     if lock_check && is_file_locked(path) {
@@ -244,16 +241,28 @@ pub fn manual_scan_folder(folder: &str) -> Result<Vec<(String, String, String)>,
     for entry in entries {
         let entry = entry.map_err(|e| e.to_string())?;
         let path = entry.path();
-        if path.is_file()
-            && !should_ignore_file(&path)
-            && !is_file_ignored_by_mouziignore(&path)
-        {
-            if let Ok(Some((rule, dest))) = process_file(&path) {
-                results.push((
-                    path.file_name().unwrap_or_default().to_string_lossy().to_string(),
-                    rule.name,
-                    dest,
-                ));
+        if !path.is_file() {
+            continue;
+        }
+        let file_name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+        if should_ignore_file(&path) {
+            eprintln!("[manual_scan] ignoring system/hidden/temp file: {}", file_name);
+            continue;
+        }
+        if is_file_ignored_by_mouziignore(&path) {
+            eprintln!("[manual_scan] ignoring due to .mouziignore: {}", file_name);
+            continue;
+        }
+        match process_file(&path, true) {
+            Ok(Some((rule, dest))) => {
+                eprintln!("[manual_scan] organized: {} -> {} ({})", file_name, dest, rule.name);
+                results.push((file_name, rule.name, dest));
+            }
+            Ok(None) => {
+                eprintln!("[manual_scan] no matching rule or skipped: {}", file_name);
+            }
+            Err(e) => {
+                eprintln!("[manual_scan] error processing {}: {}", file_name, e);
             }
         }
     }

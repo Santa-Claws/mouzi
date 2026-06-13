@@ -26,6 +26,7 @@ pub struct FolderWatcher {
     /// Shared with AppState — stores the last destination folder to open on notification click
     pending_open_folder: Arc<Mutex<Option<String>>>,
     handle: Option<std::thread::JoinHandle<()>>,
+    app_handle: Option<tauri::AppHandle>,
 }
 
 impl FolderWatcher {
@@ -40,6 +41,7 @@ impl FolderWatcher {
             ignored_files,
             pending_open_folder,
             handle: None,
+            app_handle: None,
         }
     }
 
@@ -71,7 +73,7 @@ impl FolderWatcher {
 
                 for path in to_process {
                     if path.exists() && path.is_file() {
-                        match process_file(&path) {
+                        match process_file(&path, false) {
                             Ok(Some((rule, dest))) => {
                                 let file_name = path.file_name()
                                     .unwrap_or_default()
@@ -161,6 +163,7 @@ impl FolderWatcher {
     }
 
     pub fn watch_folders(&mut self, app_handle: tauri::AppHandle) -> Result<(), String> {
+        self.app_handle = Some(app_handle.clone());
         let folders = get_watched_folders().map_err(|e| e.to_string())?;
         let pending = self.pending.clone();
         let pending_manual = self.pending_manual.clone();
@@ -213,11 +216,13 @@ impl FolderWatcher {
                                 .to_string();
                             let mut manual = pm.lock().unwrap();
                             manual.insert(path_str.clone());
+                            let count = manual.len();
                             drop(manual);
                             let _ = h.emit("file-detected", serde_json::json!({
                                 "folder": folder_path,
                                 "file": file_name,
                             }));
+                            crate::tray::update_tray_tooltip(&h, count);
                         } else {
                             let grace = crate::db::get_settings()
                                 .map(|s| s.grace_period_seconds as u64)
@@ -264,12 +269,14 @@ impl FolderWatcher {
                                         .to_string();
                                     let mut manual = pm.lock().unwrap();
                                     manual.insert(path_str.clone());
+                                    let count = manual.len();
                                     drop(manual);
 
                                     let _ = h.emit("file-detected", serde_json::json!({
                                         "folder": folder_path,
                                         "file": file_name,
                                     }));
+                                    crate::tray::update_tray_tooltip(&h, count);
                                 } else {
                                     // Silent mode: schedule for auto-organize after grace period.
                                     let grace = crate::db::get_settings()
@@ -316,12 +323,19 @@ impl FolderWatcher {
         self.ignored_files = ignored_files;
     }
 
+    fn update_tray_tooltip(&self) {
+        if let Some(app) = &self.app_handle {
+            let count = self.pending_manual.lock().unwrap().len();
+            crate::tray::update_tray_tooltip(app, count);
+        }
+    }
+
     /// Return the list of files detected in manual-mode folders that have not yet
     /// been organized. Non-existent files are pruned automatically.
     pub fn get_pending_files(&self) -> Vec<(String, String)> {
         let mut manual = self.pending_manual.lock().unwrap();
         manual.retain(|p| Path::new(p).exists());
-        manual
+        let result: Vec<(String, String)> = manual
             .iter()
             .filter_map(|path| {
                 let p = Path::new(path);
@@ -329,7 +343,10 @@ impl FolderWatcher {
                 let name = p.file_name()?.to_string_lossy().to_string();
                 Some((folder, name))
             })
-            .collect()
+            .collect();
+        drop(manual);
+        self.update_tray_tooltip();
+        result
     }
 
     /// Move any manually-collected files for the given folder into the auto-organize
@@ -350,6 +367,7 @@ impl FolderWatcher {
             manual.remove(p);
         }
         drop(manual);
+        self.update_tray_tooltip();
 
         let grace = crate::db::get_settings()
             .map(|s| s.grace_period_seconds as u64)

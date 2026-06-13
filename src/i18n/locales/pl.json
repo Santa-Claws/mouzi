@@ -98,6 +98,7 @@
       "remove": "Usuń"
     },
     "about": {
+      "title": "O aplikacji",
       "tagline": "Twoje pobrane, pod kontrolą.",
       "description": "Mouzi to cichy, elegancki organizer plików, który mieszka w zasobniku systemowym i automatycznie utrzymuje porządek w folderze Pobrane (i dowolnym innym folderze). Działa cicho w tle, monitoruje wybrane foldery i przenosi, zmienia nazwy lub sortuje pliki na podstawie konfigurowalnych reguł.",
       "checkUpdates": "Sprawdź aktualizacje",

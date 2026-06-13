@@ -14,10 +14,10 @@ import {
   Package,
   File,
   ExternalLink,
+  Inbox,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 function getIconForType(typeName: string) {
   const lower = typeName.toLowerCase();
@@ -28,6 +28,13 @@ function getIconForType(typeName: string) {
   if (lower.includes("install")) return <Package size={14} />;
   if (lower.includes("document")) return <FileText size={14} />;
   return <File size={14} />;
+}
+
+function getFolderFromPath(filePath: string | null | undefined): string | null {
+  if (!filePath) return null;
+  const lastSlash = Math.max(filePath.lastIndexOf("/"), filePath.lastIndexOf("\\"));
+  if (lastSlash === -1) return filePath;
+  return filePath.slice(0, lastSlash) || filePath;
 }
 
 export default function Popup() {
@@ -95,7 +102,8 @@ export default function Popup() {
 
   const handleClean = async () => {
     let allResults: { file: string; rule: string; destination: string }[] = [];
-    const targets = folders.length > 0 ? folders.map((f) => f.path) : [await invoke<string>("get_downloads_folder")];
+    const activeFolders = folders.filter((f) => f.mode !== "paused");
+    const targets = activeFolders.length > 0 ? activeFolders.map((f) => f.path) : [await invoke<string>("get_downloads_folder")];
     for (const path of targets) {
       const results = await scanFolder(path);
       allResults = allResults.concat(results);
@@ -113,6 +121,16 @@ export default function Popup() {
   const handleOpenDownloads = async () => {
     const downloads = folders[0]?.path || (await invoke<string>("get_downloads_folder"));
     await invoke("open_folder_cmd", { path: downloads });
+  };
+
+  const handleOpenActionFolder = async (filePath: string | null | undefined) => {
+    const folderPath = getFolderFromPath(filePath);
+    if (!folderPath) return;
+    try {
+      await invoke("open_folder_cmd", { path: folderPath });
+    } catch {
+      console.error("Failed to open folder");
+    }
   };
 
   const handleQuit = () => {
@@ -168,7 +186,8 @@ export default function Popup() {
           {t("popup.recentActions")}
         </div>
         {logs.length === 0 ? (
-          <div className="text-center py-4 text-sm text-text-muted">
+          <div className="flex flex-col items-center justify-center py-6 text-sm text-text-muted">
+            <Inbox size={28} className="mb-2 opacity-60" />
             {t("popup.noActions")}
           </div>
         ) : (
@@ -188,13 +207,22 @@ export default function Popup() {
                   {log.file_type}
                 </span>
                 {!log.undone && log.id && (
-                  <button
-                    onClick={() => undoAction(log.id!)}
-                    className="p-1 rounded hover:bg-border text-text-muted hover:text-text"
-                    title={t("popup.undo")}
-                  >
-                    <RotateCcw size={12} />
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleOpenActionFolder(log.destination_path)}
+                      className="p-1 rounded hover:bg-border text-text-muted hover:text-text"
+                      title="Open folder"
+                    >
+                      <FolderOpen size={12} />
+                    </button>
+                    <button
+                      onClick={() => undoAction(log.id!)}
+                      className="p-1 rounded hover:bg-border text-text-muted hover:text-text"
+                      title={t("popup.undo")}
+                    >
+                      <RotateCcw size={12} />
+                    </button>
+                  </>
                 )}
               </div>
             ))}
@@ -234,10 +262,9 @@ export default function Popup() {
           <div
             onPointerDown={async () => {
               try {
-                await revealItemInDir(toast.destination_folder);
+                await invoke("open_folder_cmd", { path: toast.destination_folder });
               } catch {
-                // fallback
-                await invoke("open_folder_cmd", { path: toast.destination_folder }).catch(console.error);
+                console.error("Failed to open folder");
               }
               setToast(null);
             }}

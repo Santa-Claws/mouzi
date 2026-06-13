@@ -182,6 +182,15 @@ pub fn clear_logs_cmd() -> Result<(), String> {
 
 #[tauri::command]
 pub fn scan_folder_cmd(path: String) -> Result<Vec<(String, String, String)>, String> {
+    let folders = get_watched_folders().map_err(|e| e.to_string())?;
+    if folders
+        .iter()
+        .find(|f| f.path == path)
+        .map(|f| is_folder_paused_mode(&f.mode))
+        .unwrap_or(false)
+    {
+        return Ok(vec![]);
+    }
     manual_scan_folder(&path)
 }
 
@@ -190,13 +199,23 @@ pub fn open_folder_cmd(path: String) -> Result<(), String> {
     if path.is_empty() {
         return Err("Path is empty".to_string());
     }
+    eprintln!("[open_folder_cmd] opening: {}", path);
     #[cfg(target_os = "windows")]
     {
-        // Use 'cmd /c start' which is the most reliable way to open folders on Windows
-        std::process::Command::new("cmd")
-            .args(["/c", "start", "", &path])
-            .spawn()
-            .map_err(|e| e.to_string())?;
+        if path.starts_with("http://") || path.starts_with("https://") {
+            std::process::Command::new("cmd")
+                .args(["/c", "start", "", &path])
+                .spawn()
+                .map_err(|e| e.to_string())?;
+        } else {
+            // Normalize to backslashes - Windows Explorer requires them
+            let win_path = path.replace('/', "\\");
+            std::process::Command::new("powershell")
+                .args(["-NoProfile", "-NonInteractive",
+                       "-Command", &format!("explorer '{}'", win_path)])
+                .spawn()
+                .map_err(|e| e.to_string())?;
+        }
     }
     #[cfg(not(target_os = "windows"))]
     {

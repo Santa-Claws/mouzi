@@ -3,10 +3,13 @@ import { useTranslation } from "react-i18next";
 import { useAppStore, Rule, ScheduleSettings } from "../store/useAppStore";
 import { invoke } from "@tauri-apps/api/core";
 import { save, open } from "@tauri-apps/plugin-dialog";
+import About from "./About";
 import {
   Folder,
+  FolderOpen,
   List,
   History,
+  Inbox,
   Globe,
   Plus,
   Trash2,
@@ -17,12 +20,11 @@ import {
   RotateCcw,
   Download,
   Upload,
-  ExternalLink,
-  Heart,
+  Info,
 } from "lucide-react";
 
 
-type Tab = "folders" | "rules" | "history" | "ignore" | "general";
+type Tab = "folders" | "rules" | "history" | "ignore" | "general" | "about";
 type GraceUnit = "seconds" | "minutes" | "hours";
 
 const GRACE_STEPS = [
@@ -67,6 +69,14 @@ function nearestGraceStep(seconds: number): number {
   return GRACE_STEPS.reduce((prev, curr) =>
     Math.abs(curr - seconds) < Math.abs(prev - seconds) ? curr : prev
   );
+}
+
+function getDirectoryFromPath(filePath: string | null): string | null {
+  if (!filePath) return null;
+  const normalized = filePath.replace(/\\/g, "/");
+  const lastSlash = normalized.lastIndexOf("/");
+  if (lastSlash <= 0) return normalized;
+  return normalized.slice(0, lastSlash);
 }
 
 function defaultSchedule(): ScheduleSettings {
@@ -307,6 +317,12 @@ export default function Settings() {
             onClick={() => setTab("general")}
             icon={<Globe size={16} />}
             label={t("settings.general.title")}
+          />
+          <SidebarButton
+            active={tab === "about"}
+            onClick={() => setTab("about")}
+            icon={<Info size={16} />}
+            label={t("settings.about.title")}
           />
         </nav>
       </div>
@@ -584,7 +600,10 @@ export default function Settings() {
               </div>
             </div>
             {logs.length === 0 ? (
-              <div className="text-center py-12 text-text-muted">{t("settings.history.empty")}</div>
+              <div className="flex flex-col items-center justify-center py-12 text-text-muted">
+                <Inbox size={48} className="mb-3 opacity-50" />
+                <span>{t("settings.history.empty")}</span>
+              </div>
             ) : (
               <div className="space-y-2">
                 {logs.map((log) => (
@@ -601,6 +620,24 @@ export default function Settings() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      {log.destination_path && (
+                        <button
+                          onClick={async () => {
+                            const folderPath = getDirectoryFromPath(log.destination_path);
+                            if (folderPath) {
+                              try {
+                                await invoke("open_folder_cmd", { path: folderPath });
+                              } catch (e) {
+                                console.error("Failed to open folder:", e);
+                              }
+                            }
+                          }}
+                          className="p-1.5 rounded-md text-text-muted hover:bg-border"
+                          title="Open folder"
+                        >
+                          <FolderOpen size={16} />
+                        </button>
+                      )}
                       {log.undone ? (
                         <span className="text-xs text-text-muted flex items-center gap-1">
                           <Check size={12} />
@@ -754,6 +791,7 @@ export default function Settings() {
                   />
                 </button>
               </div>
+
             </div>
 
             {/* Scheduler */}
@@ -829,73 +867,15 @@ export default function Settings() {
               </button>
             </div>
 
-            <div className="border-t border-border" />
-
-            {/* Logo + tagline */}
-            <div className="flex items-center gap-3">
-              <img
-                src="/mouzilogo.png"
-                alt={t("app.name")}
-                className="h-12 w-12 rounded-xl"
-              />
-              <div>
-                <h2 className="text-xl font-semibold">Mouzi</h2>
-                <p className="text-sm text-text-muted">{t("settings.about.tagline")}</p>
-              </div>
-            </div>
-
-            <p className="text-sm text-text-muted leading-relaxed">
-              {t("settings.about.description")}
-            </p>
-
-            {/* Check for Updates */}
-            <button
-              onClick={() =>
-                invoke("open_folder_cmd", {
-                  path: "https://mouzi.cc/#download",
-                })
-              }
-              className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text hover:bg-surface-hover transition-colors"
-            >
-              <Download size={16} className="text-primary" />
-              {t("settings.about.checkUpdates")}
-              <ExternalLink size={14} className="ml-auto text-text-muted" />
-            </button>
-
-            {/* Author */}
-            <div className="pt-2 border-t border-border">
-              <button
-                onClick={() =>
-                  invoke("open_folder_cmd", { path: "https://github.com/hsr88" })
-                }
-                className="flex items-center gap-2 text-sm text-primary hover:underline"
-              >
-                <ExternalLink size={16} />
-                github.com/hsr88
-              </button>
-              <p className="text-xs text-text-muted mt-1">{t("settings.about.builtBy")}</p>
-            </div>
-
-            {/* Ko-fi - big & bold */}
-            <div className="pt-4 border-t border-border text-center">
-              <button
-                onClick={() =>
-                  invoke("open_folder_cmd", { path: "https://ko-fi.com/hsr" })
-                }
-                className="inline-flex items-center gap-2 rounded-xl bg-[#ff5e5b] px-8 py-3 text-base font-semibold text-white shadow-lg shadow-[#ff5e5b]/20 hover:bg-[#e05451] hover:shadow-xl hover:shadow-[#ff5e5b]/30 hover:-translate-y-0.5 transition-all"
-              >
-                <Heart size={20} className="fill-white" />
-                {t("settings.about.support")}
-              </button>
-              <p className="text-xs text-text-muted mt-3">
-                {t("settings.about.supportDesc")}
-              </p>
-            </div>
           </div>
         )}
 
         {tab === "ignore" && (
           <IgnoreTab />
+        )}
+
+        {tab === "about" && (
+          <About />
         )}
       </div>
     </div>

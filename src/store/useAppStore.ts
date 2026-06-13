@@ -42,6 +42,16 @@ export interface AppSettings {
   lock_check_enabled: boolean;
 }
 
+export const defaultSettings: AppSettings = {
+  language: 'en',
+  theme: 'system',
+  telemetry_enabled: false,
+  first_run: true,
+  autostart: true,
+  grace_period_seconds: 300,
+  lock_check_enabled: true,
+};
+
 export interface ScheduleSettings {
   schedule_enabled: boolean;
   schedule_times_per_day: number;

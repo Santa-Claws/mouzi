@@ -95,9 +95,10 @@
       "tips": "Suggerimenti:",
       "save": "Salva .mouziignore",
       "saved": "Salvato!",
-      "remove": "Remove"
+      "remove": "Rimuovi"
     },
     "about": {
+      "title": "Informazioni",
       "tagline": "I tuoi download, domati.",
       "description": "Mouzi è un organizzatore di file silenzioso ed elegante che vive nella tua barra delle applicazioni e tiene in ordine automaticamente la cartella Download (e qualsiasi altra cartella). Funziona silenziosamente in background, monitora le cartelle selezionate e sposta, rinomina o ordina i file in base a regole personalizzabili.",
       "checkUpdates": "Controlla aggiornamenti",
@@ -122,6 +123,6 @@
   },
   "common": {
     "cancel": "Annulla",
-    "off": "OFF"
+    "off": "Spento"
   }
 }
