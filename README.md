@@ -60,9 +60,9 @@ Mouzi is a silent, elegant file organizer that lives in your system tray and kee
 
 ### 📂 Folder Modes
 Each watched folder can run in one of three modes:
-- **Silent** — automatically organize files as they arrive (default)
-- **Manual** — collect files and only process them when you click **Clean Now**
-- **Paused** — watch the folder but don't move anything
+- **Silent** - automatically organize files as they arrive (default)
+- **Manual** - collect files and only process them when you click **Clean Now**
+- **Paused** - watch the folder but don't move anything
 
 ### 📜 History & Undo
 - Every action is logged locally in SQLite
