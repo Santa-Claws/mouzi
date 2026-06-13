@@ -93,9 +93,9 @@ Auto-detects your system language. Supported:
 
 | Installer | Size | Best For |
 |-----------|------|----------|
-| [`Mouzi_0.1.2_x64-setup.exe`](https://mouzi.cc/download) | ~3.3 MB | Regular users (auto-installer) |
-| [`Mouzi_0.1.2_x64_en-US.msi`](https://mouzi.cc/download) | ~4.7 MB | Enterprise / Active Directory |
-| [`Mouzi_0.1.2_x64-portable.exe`](https://mouzi.cc/download) | ~14 MB | Power users (no install) |
+| [`Mouzi_0.1.3_x64-setup.exe`](https://mouzi.cc/download) | ~3.3 MB | Regular users (auto-installer) |
+| [`Mouzi_0.1.3_x64_en-US.msi`](https://mouzi.cc/download) | ~4.7 MB | Enterprise / Active Directory |
+| [`Mouzi_0.1.3_x64-portable.exe`](https://mouzi.cc/download) | ~14 MB | Power users (no install) |
 
 > ⚠️ **Windows 10/11.** Requires the [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on most systems).
 
@@ -103,19 +103,19 @@ Auto-detects your system language. Supported:
 
 | Package | Size | Best For |
 |---------|------|----------|
-| [`Mouzi_0.1.2_amd64.AppImage`](https://mouzi.cc/download/linux) | ~86 MB | Universal — works on most distros |
-| [`Mouzi_0.1.2_amd64.deb`](https://mouzi.cc/download/linux) | ~6.9 MB | Debian, Ubuntu, Mint, Pop!_OS |
-| [`Mouzi-0.1.2-1.x86_64.rpm`](https://mouzi.cc/download/linux) | ~6.9 MB | Fedora, openSUSE, RHEL |
+| [`Mouzi_0.1.3_amd64.AppImage`](https://mouzi.cc/download/linux) | ~86 MB | Universal — works on most distros |
+| [`Mouzi_0.1.3_amd64.deb`](https://mouzi.cc/download/linux) | ~6.9 MB | Debian, Ubuntu, Mint, Pop!_OS |
+| [`Mouzi-0.1.3-1.x86_64.rpm`](https://mouzi.cc/download/linux) | ~6.9 MB | Fedora, openSUSE, RHEL |
 
 > 🐧 **Linux requirements:** `libwebkit2gtk-4.1` and `libayatana-appindicator3`. Most modern distros have these pre-installed.
 
 **SHA-256 Checksums**
 
 ```
-Mouzi_0.1.2_x64-setup.exe:   (see release page)
-Mouzi_0.1.2_amd64.AppImage:  (see release page)
-Mouzi_0.1.2_amd64.deb:       (see release page)
-Mouzi-0.1.2-1.x86_64.rpm:    (see release page)
+Mouzi_0.1.3_x64-setup.exe:   (see release page)
+Mouzi_0.1.3_amd64.AppImage:  (see release page)
+Mouzi_0.1.3_amd64.deb:       (see release page)
+Mouzi-0.1.3-1.x86_64.rpm:    (see release page)
 ```
 
 ---
@@ -201,13 +201,25 @@ Output will be in `src-tauri/target/release/bundle/`.
 
 ---
 
-## 🆕 What's New in 0.1.2
+## 🆕 What's New in 0.1.3
 
-- **Per-folder manual / paused mode** — collect files without auto-moving, or pause a folder entirely.
-- **Scheduled clean mode** — run Clean Now automatically 1–4 times per day.
-- **Extended grace period** — delay moves from seconds up to 48+ hours.
-- **Export / import rules as JSON** — back up and share your rule sets.
-- **Clean Now bug fix** — respects `.mouziignore` patterns consistently.
+### Bug Fixes
+- Clean Now no longer processes folders set to Paused mode.
+- Empty (0 B) files are now sorted correctly.
+- `.mouziignore` patterns with multiple wildcards and spaces now work reliably.
+- Folders are scanned for existing files when added or refreshed.
+- NSIS installer now closes a running Mouzi instance before installing.
+
+### UI / UX
+- New warm color theme matching [mouzi.cc](https://mouzi.cc).
+- Added dedicated About tab in Settings.
+- Tray tooltip now shows the number of pending files.
+- Added Open folder buttons in Recent Actions and History.
+- Improved empty states with icons.
+- Revert All button is disabled when there's nothing to revert.
+
+### Localization
+- Fixed missing translations in German, French, Italian, Russian, and Japanese.
 
 ---
 
