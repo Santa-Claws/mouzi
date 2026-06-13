@@ -282,3 +282,35 @@ pub fn manual_scan_folder(folder: &str) -> Result<Vec<(String, String, String)>,
 
     Ok(results)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_move_file_cross_device() {
+        let src_dir = PathBuf::from("E:\\_PROJEKTY\\tidytray\\target\\test_src");
+        let dst_dir = PathBuf::from("C:\\temp\\mouzi_test_dst");
+        fs::create_dir_all(&src_dir).unwrap();
+        fs::create_dir_all(&dst_dir).unwrap();
+
+        let src = src_dir.join("cross_device_test.txt");
+        let dst = dst_dir.join("cross_device_test.txt");
+
+        fs::write(&src, "hello cross-device").unwrap();
+        if dst.exists() {
+            fs::remove_file(&dst).unwrap();
+        }
+
+        move_file_cross_device(&src, &dst).unwrap();
+
+        assert!(dst.exists(), "destination file should exist after cross-device move");
+        assert!(!src.exists(), "source file should be removed after cross-device move");
+
+        // cleanup
+        let _ = fs::remove_file(&dst);
+        let _ = fs::remove_file(&src);
+    }
+}
