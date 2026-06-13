@@ -167,6 +167,7 @@ Downloads/Documents/{year}/{month}/
 |  Backend (Rust)                              |
 |  +- File Watcher (notify crate)              |
 |  +- Rules Engine                             |
+|  +- Scheduler (time-based cleaning)          |
 |  +- SQLite Database (rusqlite)               |
 |  +- System Tray & Notifications              |
 +---------------------------------------------+
@@ -212,6 +213,7 @@ Output will be in `src-tauri/target/release/bundle/`.
 ### Bug Fixes
 - Clean Now no longer processes folders set to Paused mode.
 - Scheduled clean now skips Manual-mode folders.
+- Clean Now bypasses the grace period so manual cleanup is immediate.
 - Empty (0 B) files are now sorted correctly.
 - `.mouziignore` patterns with multiple wildcards and spaces now work reliably.
 - Folders are scanned for existing files when added or refreshed.
