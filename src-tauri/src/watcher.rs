@@ -73,6 +73,16 @@ impl FolderWatcher {
 
                 for path in to_process {
                     if path.exists() && path.is_file() {
+                        // Defensive check: if the folder has been switched to manual or paused
+                        // since the file was queued, skip it instead of auto-organizing.
+                        let should_skip = path.parent().and_then(|parent| {
+                            let parent_str = parent.to_string_lossy().to_string();
+                            get_watched_folders().ok()?.into_iter().find(|f| f.path == parent_str)
+                        }).map(|f| !f.enabled || is_folder_paused_mode(&f.mode) || is_folder_manual_mode(&f.mode))
+                          .unwrap_or(false);
+                        if should_skip {
+                            continue;
+                        }
                         match process_file(&path, false) {
                             Ok(Some((rule, dest))) => {
                                 let file_name = path.file_name()

@@ -1,4 +1,4 @@
-use crate::db::{get_settings, get_watched_folders, is_folder_paused_mode};
+use crate::db::{get_settings, get_watched_folders, is_folder_manual_mode, is_folder_paused_mode};
 use crate::rules::manual_scan_folder;
 use chrono::{Duration, Local, NaiveDate, NaiveTime};
 use serde_json::json;
@@ -97,7 +97,7 @@ fn perform_scheduled_clean(app_handle: &AppHandle) -> Result<(), String> {
     let folders = get_watched_folders().map_err(|e| e.to_string())?;
     let mut total = 0usize;
     for folder in folders {
-        if !folder.enabled || is_folder_paused_mode(&folder.mode) {
+        if !folder.enabled || is_folder_paused_mode(&folder.mode) || is_folder_manual_mode(&folder.mode) {
             continue;
         }
         if !std::path::Path::new(&folder.path).exists() {
