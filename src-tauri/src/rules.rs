@@ -154,6 +154,19 @@ pub fn find_matching_rule(file: &FileInfo) -> Option<Rule> {
     rules.into_iter().find(|rule| matches_rule(file, rule))
 }
 
+fn move_file_cross_device(src: &Path, dst: &Path) -> Result<(), std::io::Error> {
+    // Try a fast atomic rename first (same filesystem).
+    match fs::rename(src, dst) {
+        Ok(()) => Ok(()),
+        Err(_) => {
+            // Fallback: copy and remove for cross-device / cross-drive moves.
+            fs::copy(src, dst)?;
+            fs::remove_file(src)?;
+            Ok(())
+        }
+    }
+}
+
 pub fn execute_rule(file_info: &FileInfo, rule: &Rule) -> Result<String, String> {
     let base_folder = file_info
         .path
@@ -181,10 +194,10 @@ pub fn execute_rule(file_info: &FileInfo, rule: &Rule) -> Result<String, String>
                     .to_string_lossy();
                 let new_name = format!("{}_{}.{}", stem, Utc::now().timestamp(), file_info.extension);
                 let new_path = dest.join(&new_name);
-                fs::rename(&file_info.path, &new_path).map_err(|e| e.to_string())?;
+                move_file_cross_device(&file_info.path, &new_path).map_err(|e| e.to_string())?;
                 Ok(new_path.to_string_lossy().to_string())
             } else {
-                fs::rename(&file_info.path, &new_path).map_err(|e| e.to_string())?;
+                move_file_cross_device(&file_info.path, &new_path).map_err(|e| e.to_string())?;
                 Ok(new_path.to_string_lossy().to_string())
             }
         }
