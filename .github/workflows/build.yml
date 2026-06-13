@@ -65,5 +65,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cp src-tauri/target/release/mouzi.exe "Mouzi_${{ github.ref_name }}_x64-portable.exe"
-          gh release upload ${{ github.ref_name }} "Mouzi_${{ github.ref_name }}_x64-portable.exe" --clobber
+          VERSION="${GITHUB_REF_NAME#v}"
+          cp src-tauri/target/release/mouzi.exe "Mouzi_${VERSION}_x64-portable.exe"
+          gh release upload "${GITHUB_REF_NAME}" "Mouzi_${VERSION}_x64-portable.exe" --clobber
