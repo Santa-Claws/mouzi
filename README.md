@@ -58,6 +58,12 @@ Mouzi is a silent, elegant file organizer that lives in your system tray and kee
 - Set up via Settings UI or write a `.mouziignore` file manually
 - Supports wildcards (`*.tmp`), exact names (`.DS_Store`), and folders (`node_modules/`)
 
+### 📂 Folder Modes
+Each watched folder can run in one of three modes:
+- **Silent** — automatically organize files as they arrive (default)
+- **Manual** — collect files and only process them when you click **Clean Now**
+- **Paused** — watch the folder but don't move anything
+
 ### 📜 History & Undo
 - Every action is logged locally in SQLite
 - Undo any single move with one click
@@ -205,6 +211,7 @@ Output will be in `src-tauri/target/release/bundle/`.
 
 ### Bug Fixes
 - Clean Now no longer processes folders set to Paused mode.
+- Scheduled clean now skips Manual-mode folders.
 - Empty (0 B) files are now sorted correctly.
 - `.mouziignore` patterns with multiple wildcards and spaces now work reliably.
 - Folders are scanned for existing files when added or refreshed.
@@ -213,6 +220,7 @@ Output will be in `src-tauri/target/release/bundle/`.
 ### UI / UX
 - New warm color theme matching [mouzi.cc](https://mouzi.cc).
 - Added dedicated About tab in Settings.
+- Added Manual mode for folders — collect files and clean them only on demand.
 - Tray tooltip now shows the number of pending files.
 - Added Open folder buttons in Recent Actions and History.
 - Improved empty states with icons.
@@ -227,7 +235,7 @@ Output will be in `src-tauri/target/release/bundle/`.
 
 ### Already implemented
 
-MVP with default rules, multi-language support, dark mode, history & undo, start with Windows, custom folders with local rules, system files ignored, check for updates, `.mouziignore`, portable version, browser temp files ignored, grace period option, file lock check, single-instance guard, first-run popup visibility, clickable toast, skip 0 KB placeholder files, Linux port.
+MVP with default rules, multi-language support, dark mode, history & undo, start with Windows, custom folders with local rules, folder modes (silent / manual / paused), system files ignored, check for updates, `.mouziignore`, portable version, browser temp files ignored, grace period option, file lock check, single-instance guard, first-run popup visibility, clickable toast, skip 0 KB placeholder files, Linux port.
 
 ### Upcoming
 
