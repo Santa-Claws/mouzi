@@ -56,7 +56,7 @@ jobs:
             ## Download
             - **Windows**: `.msi` (enterprise/IT) or `-setup.exe` (regular install)
             - **Linux**: `.AppImage` (universal), `.deb` (Debian/Ubuntu), `.rpm` (Fedora/openSUSE)
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
 
