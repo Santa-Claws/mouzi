@@ -31,7 +31,7 @@ pub fn save_mouziignore(folder_path: &str, patterns: &[String]) -> Result<(), St
 }
 
 /// Check if a file name matches any of the ignore patterns.
-/// Supports: literal match, `*` wildcard, and `folder/` directory suffix.
+/// Supports: literal match, `*` wildcard (any number of `*`), and `folder/` directory suffix.
 /// On Windows, matching is case-insensitive for both literals and wildcards.
 pub fn is_ignored(name: &str, patterns: &[String]) -> bool {
     #[cfg(windows)]
@@ -53,13 +53,8 @@ pub fn is_ignored(name: &str, patterns: &[String]) -> bool {
         }
         // Wildcard pattern: contains *
         if pat.contains('*') {
-            let parts: Vec<&str> = pat.split('*').collect();
-            if parts.len() == 2 {
-                let prefix = parts[0];
-                let suffix = parts[1];
-                if name.starts_with(prefix) && name.ends_with(suffix) {
-                    return true;
-                }
+            if glob_match(&name, &pat) {
+                return true;
             }
             continue;
         }
@@ -69,6 +64,45 @@ pub fn is_ignored(name: &str, patterns: &[String]) -> bool {
         }
     }
     false
+}
+
+/// Simple glob matcher supporting multiple `*` wildcards.
+/// On Windows both `name` and `pat` are expected to already be lowercased.
+fn glob_match(name: &str, pat: &str) -> bool {
+    let parts: Vec<&str> = pat.split('*').collect();
+    if parts.is_empty() {
+        return true;
+    }
+
+    let starts_with_star = pat.starts_with('*');
+    let ends_with_star = pat.ends_with('*');
+    let mut rest = name;
+
+    for (i, part) in parts.iter().enumerate() {
+        if part.is_empty() {
+            continue;
+        }
+        if i == 0 && !starts_with_star {
+            // First non-empty part must match the start of the name.
+            if !rest.starts_with(part) {
+                return false;
+            }
+            rest = &rest[part.len()..];
+        } else {
+            // Subsequent parts must appear somewhere in the remaining name.
+            match rest.find(part) {
+                Some(pos) => rest = &rest[pos + part.len()..],
+                None => return false,
+            }
+        }
+    }
+
+    // If the pattern does not end with `*`, the remaining text must be empty.
+    if !ends_with_star && !rest.is_empty() {
+        return false;
+    }
+
+    true
 }
 
 #[cfg(test)]
@@ -85,6 +119,15 @@ mod tests {
         assert!(is_ignored("README", &["readme".to_string()]));
         assert!(!is_ignored("foo.tmp", &["*.txt".to_string()]));
         assert!(!is_ignored("FOO.TMP", &["*.txt".to_string()]));
+    }
+
+    #[test]
+    fn multiple_wildcards_and_spaces() {
+        assert!(is_ignored("The Chronicle Herald (Metro)_20260612.txt", &["*metro*".to_string()]));
+        assert!(is_ignored("The Chronicle Herald (Metro)_20260612.txt", &["*chronicle herald*".to_string()]));
+        assert!(is_ignored("some.Metro.file.txt", &["*metro*.txt".to_string()]));
+        assert!(is_ignored("file.name.txt", &["file.*.txt".to_string()]));
+        assert!(!is_ignored("foo.txt", &["*metro*".to_string()]));
     }
 
     #[test]
