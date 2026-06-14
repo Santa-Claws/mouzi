@@ -83,7 +83,10 @@ impl FolderWatcher {
                         if should_skip {
                             continue;
                         }
-                        match process_file(&path, false) {
+                        // Files in the pending queue have already waited for the grace period,
+                        // so we bypass the grace check here to avoid files being skipped forever
+                        // if their modification time changes while queued.
+                        match process_file(&path, true) {
                             Ok(Some((rule, dest))) => {
                                 let file_name = path.file_name()
                                     .unwrap_or_default()
