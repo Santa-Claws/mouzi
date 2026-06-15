@@ -241,6 +241,7 @@ MVP with default rules, multi-language support, dark mode, history & undo, start
 
 ### Upcoming
 
+- [ ] Confirmation dialog for "Delete History" button
 - [ ] Batch group selected files
 - [ ] Suggest mode (modal confirmation per file)
 - [ ] Local AI tagging (ONNX runtime for content classification)
