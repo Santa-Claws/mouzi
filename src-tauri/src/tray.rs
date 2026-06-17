@@ -1,6 +1,7 @@
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Manager};
+use tauri_plugin_notification::NotificationExt;
 use crate::db::{get_settings, get_watched_folders, is_folder_paused_mode};
 use crate::i18n::TrayI18n;
 use crate::rules::manual_scan_folder;
@@ -104,10 +105,16 @@ fn perform_clean(app: &AppHandle) -> Result<(), String> {
             total += results.len();
         }
     }
-    if total > 0 {
-        let msg = i18n.get("organized").replace("{}", &total.to_string());
-        let _ = app.emit("show-notification", msg);
-    }
+    let msg = if total > 0 {
+        i18n.get("organized").replace("{}", &total.to_string())
+    } else {
+        "Nothing to organize.".to_string()
+    };
+    let _ = app.notification()
+        .builder()
+        .title("Mouzi")
+        .body(&msg)
+        .show();
     Ok(())
 }
 

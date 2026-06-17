@@ -1,0 +1,455 @@
+#!/usr/bin/env python3
+"""Mouzi CLI — manage settings, rules, and watched folders from the terminal."""
+
+import curses
+import sqlite3
+import os
+import sys
+
+DB_PATH = os.path.expanduser("~/.local/share/mouzi/mouzi.db")
+
+# ── ANSI helpers (used outside curses for error messages) ─────────────────────
+R = "\033[0m"
+B = "\033[1m"
+RED = "\033[31m"
+GRN = "\033[32m"
+YLW = "\033[33m"
+CYN = "\033[36m"
+
+
+def db():
+    if not os.path.exists(DB_PATH):
+        print(f"{RED}mouzi.db not found at {DB_PATH}{R}")
+        print("Is Mouzi installed? Run it at least once to create the database.")
+        sys.exit(1)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+# ── curses helpers ─────────────────────────────────────────────────────────────
+
+def init_colors():
+    curses.start_color()
+    curses.use_default_colors()
+    curses.init_pair(1, curses.COLOR_CYAN,    -1)   # header / title
+    curses.init_pair(2, curses.COLOR_GREEN,   -1)   # selected / on
+    curses.init_pair(3, curses.COLOR_YELLOW,  -1)   # accent / label
+    curses.init_pair(4, curses.COLOR_RED,     -1)   # danger / off
+    curses.init_pair(5, curses.COLOR_WHITE,   -1)   # normal
+    curses.init_pair(6, curses.COLOR_BLACK,   curses.COLOR_CYAN)  # highlight bar
+
+
+H   = lambda: curses.color_pair(1) | curses.A_BOLD
+SEL = lambda: curses.color_pair(6) | curses.A_BOLD
+ON  = lambda: curses.color_pair(2)
+LBL = lambda: curses.color_pair(3) | curses.A_BOLD
+ERR = lambda: curses.color_pair(4)
+NRM = lambda: curses.color_pair(5)
+
+
+def safe_addstr(win, y, x, text, attr=0):
+    h, w = win.getmaxyx()
+    if y < 0 or y >= h or x < 0:
+        return
+    text = text[: max(0, w - x - 1)]
+    try:
+        win.addstr(y, x, text, attr)
+    except curses.error:
+        pass
+
+
+def draw_border(win, title=""):
+    win.clear()
+    win.border()
+    h, w = win.getmaxyx()
+    if title:
+        label = f" {title} "
+        safe_addstr(win, 0, (w - len(label)) // 2, label, H())
+
+
+def footer(win, keys: str):
+    h, w = win.getmaxyx()
+    safe_addstr(win, h - 1, 2, keys[:w - 4], LBL())
+
+
+def pick_menu(stdscr, title: str, items: list[str], back_label="Back") -> int:
+    """Return index of chosen item, or -1 for back/quit."""
+    entries = list(items) + [f"← {back_label}"]
+    cur = 0
+    while True:
+        stdscr.clear()
+        h, w = stdscr.getmaxyx()
+        safe_addstr(stdscr, 1, 2, title, H())
+        safe_addstr(stdscr, 2, 2, "─" * (w - 4), LBL())
+        for i, entry in enumerate(entries):
+            y = 4 + i
+            if y >= h - 2:
+                break
+            if i == cur:
+                safe_addstr(stdscr, y, 2, f"  {entry:<{w-6}}", SEL())
+            else:
+                attr = ERR() if i == len(entries) - 1 else NRM()
+                safe_addstr(stdscr, y, 2, f"  {entry}", attr)
+        footer(stdscr, "↑↓ move   Enter select   q quit")
+        stdscr.refresh()
+        k = stdscr.getch()
+        if k in (curses.KEY_UP, ord('k')) and cur > 0:
+            cur -= 1
+        elif k in (curses.KEY_DOWN, ord('j')) and cur < len(entries) - 1:
+            cur += 1
+        elif k in (curses.KEY_ENTER, 10, 13):
+            if cur == len(entries) - 1:
+                return -1
+            return cur
+        elif k in (ord('q'), 27):
+            return -1
+
+
+def prompt_string(stdscr, prompt: str, default: str = "") -> str | None:
+    """Inline string prompt. Returns None if cancelled."""
+    h, w = stdscr.getmaxyx()
+    y = h - 3
+    safe_addstr(stdscr, y, 2, f"{prompt} [{default}]: " + " " * (w - len(prompt) - len(default) - 10), LBL())
+    stdscr.refresh()
+    curses.echo()
+    curses.curs_set(1)
+    val = stdscr.getstr(y, len(prompt) + len(default) + 6, w - 10).decode().strip()
+    curses.noecho()
+    curses.curs_set(0)
+    return val if val else (default or None)
+
+
+def confirm(stdscr, msg: str) -> bool:
+    h, w = stdscr.getmaxyx()
+    safe_addstr(stdscr, h - 3, 2, f"{msg} [y/N]: " + " " * 20, ERR())
+    stdscr.refresh()
+    k = stdscr.getch()
+    return k in (ord('y'), ord('Y'))
+
+
+# ── Settings ───────────────────────────────────────────────────────────────────
+
+BOOL_FIELDS = {"autostart", "telemetry_enabled", "lock_check_enabled", "schedule_enabled"}
+CHOICE_FIELDS = {
+    "language": ["en", "zh", "es", "fr", "de", "ja", "ko", "pt", "ru", "ar"],
+    "theme": ["system", "light", "dark"],
+    "schedule_times_per_day": ["1", "2", "3", "4"],
+}
+SKIP_FIELDS = {"id", "first_run"}
+FIELD_LABELS = {
+    "language":              "Language",
+    "theme":                 "Theme",
+    "autostart":             "Launch at login",
+    "telemetry_enabled":     "Telemetry",
+    "lock_check_enabled":    "Skip locked files",
+    "grace_period_seconds":  "Grace period (sec)",
+    "schedule_enabled":      "Scheduled clean",
+    "schedule_times_per_day":"Clean times per day",
+    "schedule_time_1":       "Schedule time 1 (HH:MM)",
+    "schedule_time_2":       "Schedule time 2 (HH:MM)",
+    "schedule_time_3":       "Schedule time 3 (HH:MM)",
+    "schedule_time_4":       "Schedule time 4 (HH:MM)",
+}
+
+
+def settings_screen(stdscr):
+    while True:
+        with db() as conn:
+            row = conn.execute("SELECT * FROM settings LIMIT 1").fetchone()
+        if not row:
+            return
+
+        fields = [k for k in row.keys() if k not in SKIP_FIELDS]
+        labels = [FIELD_LABELS.get(f, f) for f in fields]
+        items = []
+        for f, lbl in zip(fields, labels):
+            val = row[f]
+            if f in BOOL_FIELDS:
+                display = "ON" if val else "OFF"
+            else:
+                display = str(val) if val is not None else "(not set)"
+            items.append(f"{lbl:<28}  {display}")
+
+        choice = pick_menu(stdscr, "Settings", items)
+        if choice == -1:
+            return
+
+        field = fields[choice]
+        current = row[field]
+
+        if field in BOOL_FIELDS:
+            new_val = 0 if current else 1
+            with db() as conn:
+                conn.execute(f"UPDATE settings SET {field} = ?", (new_val,))
+
+        elif field in CHOICE_FIELDS:
+            opts = CHOICE_FIELDS[field]
+            idx = pick_menu(stdscr, f"Set {FIELD_LABELS.get(field, field)}", opts)
+            if idx == -1:
+                continue
+            new_val = opts[idx]
+            with db() as conn:
+                conn.execute(f"UPDATE settings SET {field} = ?", (new_val,))
+
+        else:
+            stdscr.refresh()
+            val = prompt_string(stdscr, FIELD_LABELS.get(field, field), str(current or ""))
+            if val is not None:
+                with db() as conn:
+                    conn.execute(f"UPDATE settings SET {field} = ?", (val,))
+
+
+# ── Rules ──────────────────────────────────────────────────────────────────────
+
+def rules_screen(stdscr):
+    while True:
+        with db() as conn:
+            rules = conn.execute(
+                "SELECT * FROM rules ORDER BY priority"
+            ).fetchall()
+
+        items = []
+        for r in rules:
+            status = "✓" if r["enabled"] else "✗"
+            items.append(
+                f"[{status}] P{r['priority']:>2}  {r['name']:<14}  → {r['destination']}"
+            )
+        items.append("+ Add rule")
+
+        choice = pick_menu(stdscr, "Rules", items)
+        if choice == -1:
+            return
+        if choice == len(rules):
+            add_rule(stdscr)
+        else:
+            edit_rule(stdscr, dict(rules[choice]))
+
+
+def edit_rule(stdscr, rule: dict):
+    while True:
+        status = "ON" if rule["enabled"] else "OFF"
+        items = [
+            f"Toggle enabled          [{status}]",
+            f"Name                   {rule['name']}",
+            f"Priority               {rule['priority']}",
+            f"Extensions             {rule['extensions']}",
+            f"Destination folder     {rule['destination']}",
+            f"Action                 {rule['action']}",
+            "Delete rule",
+        ]
+        choice = pick_menu(stdscr, f"Rule: {rule['name']}", items)
+        if choice == -1:
+            return
+        elif choice == 0:
+            rule["enabled"] = 0 if rule["enabled"] else 1
+            with db() as conn:
+                conn.execute("UPDATE rules SET enabled=? WHERE id=?", (rule["enabled"], rule["id"]))
+        elif choice == 1:
+            val = prompt_string(stdscr, "Name", rule["name"])
+            if val:
+                rule["name"] = val
+                with db() as conn:
+                    conn.execute("UPDATE rules SET name=? WHERE id=?", (val, rule["id"]))
+        elif choice == 2:
+            val = prompt_string(stdscr, "Priority (lower = higher priority)", str(rule["priority"]))
+            if val and val.isdigit():
+                rule["priority"] = int(val)
+                with db() as conn:
+                    conn.execute("UPDATE rules SET priority=? WHERE id=?", (int(val), rule["id"]))
+        elif choice == 3:
+            val = prompt_string(stdscr, "Extensions (comma-separated)", rule["extensions"])
+            if val:
+                rule["extensions"] = val
+                with db() as conn:
+                    conn.execute("UPDATE rules SET extensions=? WHERE id=?", (val, rule["id"]))
+        elif choice == 4:
+            val = prompt_string(stdscr, "Destination subfolder name", rule["destination"])
+            if val:
+                rule["destination"] = val
+                with db() as conn:
+                    conn.execute("UPDATE rules SET destination=? WHERE id=?", (val, rule["id"]))
+        elif choice == 5:
+            idx = pick_menu(stdscr, "Action", ["move", "copy"])
+            if idx != -1:
+                action = ["move", "copy"][idx]
+                rule["action"] = action
+                with db() as conn:
+                    conn.execute("UPDATE rules SET action=? WHERE id=?", (action, rule["id"]))
+        elif choice == 6:
+            if confirm(stdscr, f"Delete rule '{rule['name']}'?"):
+                with db() as conn:
+                    conn.execute("DELETE FROM rules WHERE id=?", (rule["id"],))
+                return
+
+
+def add_rule(stdscr):
+    fields = {}
+    stdscr.clear()
+    for key, prompt, default in [
+        ("name",        "Rule name",                        ""),
+        ("extensions",  "Extensions (comma-sep, e.g. obj,fbx)", ""),
+        ("destination", "Destination subfolder",            ""),
+        ("priority",    "Priority (lower = first match)",   "50"),
+    ]:
+        stdscr.clear()
+        safe_addstr(stdscr, 1, 2, "Add Rule", H())
+        val = prompt_string(stdscr, prompt, default)
+        if val is None:
+            return
+        fields[key] = val
+
+    with db() as conn:
+        conn.execute(
+            "INSERT INTO rules (name, priority, enabled, extensions, destination, action, folder_id) "
+            "VALUES (?,?,1,?,?,?,0)",
+            (fields["name"], int(fields["priority"]) if fields["priority"].isdigit() else 50,
+             fields["extensions"], fields["destination"], "move"),
+        )
+
+
+# ── Watched Folders ────────────────────────────────────────────────────────────
+
+MODES = ["silent", "manual", "paused"]
+MODE_DESC = {
+    "silent": "auto-organizes silently",
+    "manual": "holds files for manual review",
+    "paused": "disabled (no organizing)",
+}
+
+
+def folders_screen(stdscr):
+    while True:
+        with db() as conn:
+            folders = conn.execute("SELECT * FROM watched_folders").fetchall()
+
+        items = []
+        for f in folders:
+            status = "✓" if f["enabled"] else "✗"
+            items.append(f"[{status}] {f['path']:<40}  [{f['mode']}]")
+        items.append("+ Add folder")
+
+        choice = pick_menu(stdscr, "Watched Folders", items)
+        if choice == -1:
+            return
+        if choice == len(folders):
+            stdscr.clear()
+            safe_addstr(stdscr, 1, 2, "Add Watched Folder", H())
+            path = prompt_string(stdscr, "Folder path", os.path.expanduser("~/Downloads"))
+            if path:
+                path = os.path.expanduser(path)
+                with db() as conn:
+                    try:
+                        conn.execute(
+                            "INSERT INTO watched_folders (path, enabled, mode) VALUES (?,1,'silent')",
+                            (path,)
+                        )
+                    except sqlite3.IntegrityError:
+                        pass
+        else:
+            edit_folder(stdscr, dict(folders[choice]))
+
+
+def edit_folder(stdscr, folder: dict):
+    while True:
+        status = "ON" if folder["enabled"] else "OFF"
+        items = [
+            f"Toggle enabled        [{status}]",
+            f"Change mode           [{folder['mode']}]  — {MODE_DESC.get(folder['mode'], '')}",
+            "Remove folder",
+        ]
+        choice = pick_menu(stdscr, folder["path"], items)
+        if choice == -1:
+            return
+        elif choice == 0:
+            folder["enabled"] = 0 if folder["enabled"] else 1
+            with db() as conn:
+                conn.execute("UPDATE watched_folders SET enabled=? WHERE id=?",
+                             (folder["enabled"], folder["id"]))
+        elif choice == 1:
+            idx = pick_menu(stdscr, "Mode", [f"{m} — {MODE_DESC[m]}" for m in MODES])
+            if idx != -1:
+                folder["mode"] = MODES[idx]
+                with db() as conn:
+                    conn.execute("UPDATE watched_folders SET mode=? WHERE id=?",
+                                 (folder["mode"], folder["id"]))
+        elif choice == 2:
+            if confirm(stdscr, f"Remove '{folder['path']}'?"):
+                with db() as conn:
+                    conn.execute("DELETE FROM watched_folders WHERE id=?", (folder["id"],))
+                return
+
+
+# ── Logs ───────────────────────────────────────────────────────────────────────
+
+def logs_screen(stdscr):
+    with db() as conn:
+        logs = conn.execute(
+            "SELECT timestamp, file_name, file_type, action, destination_path, undone "
+            "FROM action_logs ORDER BY id DESC LIMIT 100"
+        ).fetchall()
+
+    rows = []
+    for log in logs:
+        undone = " [undone]" if log["undone"] else ""
+        dest = os.path.basename(log["destination_path"] or "")
+        rows.append(
+            f"{log['timestamp'][:16]}  {log['file_name']:<30}  "
+            f"{log['action']:<6}  → {dest}{undone}"
+        )
+
+    if not rows:
+        rows = ["No logs yet."]
+
+    offset = 0
+    while True:
+        stdscr.clear()
+        h, w = stdscr.getmaxyx()
+        safe_addstr(stdscr, 1, 2, "Recent Activity (last 100)", H())
+        safe_addstr(stdscr, 2, 2, "─" * (w - 4), LBL())
+        visible = h - 6
+        for i, row in enumerate(rows[offset: offset + visible]):
+            safe_addstr(stdscr, 4 + i, 2, row[:w - 4], NRM())
+        footer(stdscr, "↑↓ / j k scroll   q back")
+        stdscr.refresh()
+        k = stdscr.getch()
+        if k in (curses.KEY_DOWN, ord('j')) and offset < max(0, len(rows) - visible):
+            offset += 1
+        elif k in (curses.KEY_UP, ord('k')) and offset > 0:
+            offset -= 1
+        elif k in (ord('q'), 27):
+            return
+
+
+# ── Main ───────────────────────────────────────────────────────────────────────
+
+def main(stdscr):
+    curses.curs_set(0)
+    curses.noecho()
+    stdscr.keypad(True)
+    init_colors()
+
+    while True:
+        choice = pick_menu(
+            stdscr,
+            "Mouzi",
+            ["Settings", "Rules", "Watched Folders", "Recent Logs"],
+            back_label="Quit",
+        )
+        if choice == -1:
+            break
+        elif choice == 0:
+            settings_screen(stdscr)
+        elif choice == 1:
+            rules_screen(stdscr)
+        elif choice == 2:
+            folders_screen(stdscr)
+        elif choice == 3:
+            logs_screen(stdscr)
+
+
+if __name__ == "__main__":
+    try:
+        curses.wrapper(main)
+    except KeyboardInterrupt:
+        pass

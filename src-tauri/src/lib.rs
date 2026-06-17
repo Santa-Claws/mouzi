@@ -38,12 +38,11 @@ pub fn run() {
             Some(vec!["--autostart"]),
         ))
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            // When Windows activates the app (e.g. user clicked a notification),
-            // open any pending folder first, then show the popup.
+            // When the app is activated by a second instance, open any pending folder
+            // then show the popup window (creating it if it doesn't exist yet).
             if let Some(state) = app.try_state::<AppState>() {
                 let folder = state.pending_open_folder.lock().unwrap().take();
                 if let Some(path) = folder {
-                    // Open the destination folder in Explorer robustly
                     #[cfg(target_os = "windows")]
                     {
                         let _ = std::process::Command::new("cmd")
@@ -58,14 +57,7 @@ pub fn run() {
                     }
                 }
             }
-            // Bring popup window to focus
-            if let Some(window) = app.get_webview_window("popup") {
-                let _ = window.show();
-                let _ = window.set_focus();
-            } else if let Some(window) = app.get_webview_window("settings") {
-                let _ = window.show();
-                let _ = window.set_focus();
-            }
+            tray::show_popup_window(app);
         }))
         .manage(AppState {
             watcher: Arc::new(Mutex::new(FolderWatcher::new(
@@ -108,8 +100,9 @@ pub fn run() {
                 .unwrap_or_else(|_| "en".to_string());
             tray::setup_tray(&app_handle, &tray_lang)?;
 
-            // On first launch, show the popup so the user knows the app is running
-            if is_first_run {
+            // Show popup on any non-autostart launch (covers first run and manual launches)
+            let args: Vec<String> = std::env::args().collect();
+            if is_first_run || !args.contains(&"--autostart".to_string()) {
                 tray::show_popup_window(&app_handle);
             }
 
